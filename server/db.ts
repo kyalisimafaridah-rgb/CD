@@ -162,7 +162,7 @@ export async function touchLastSignedIn(userId: number): Promise<void> {
 export async function bumpSessionVersion(userId: number): Promise<number> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  await db.update(users).set({ sessionVersion: sql`sessionVersion + 1` }).where(eq(users.id, userId));
+  await db.update(users).set({ sessionVersion: sql`${users.sessionVersion} + 1` }).where(eq(users.id, userId));
   const result = await db.select({ sessionVersion: users.sessionVersion }).from(users).where(eq(users.id, userId)).limit(1);
   return result.length > 0 ? result[0].sessionVersion : 0;
 }
@@ -170,7 +170,7 @@ export async function bumpSessionVersion(userId: number): Promise<number> {
 export async function incrementFailedLoginAttempts(userId: number): Promise<{ attempts: number }> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  await db.update(users).set({ failedLoginAttempts: sql`failedLoginAttempts + 1` }).where(eq(users.id, userId));
+  await db.update(users).set({ failedLoginAttempts: sql`${users.failedLoginAttempts} + 1` }).where(eq(users.id, userId));
   const result = await db.select({ failedLoginAttempts: users.failedLoginAttempts }).from(users).where(eq(users.id, userId)).limit(1);
   return { attempts: result.length > 0 ? result[0].failedLoginAttempts : 0 };
 }
@@ -255,7 +255,7 @@ export async function applyPasswordReset(userId: number, passwordHash: string): 
     passwordResetExpiresAt: null,
     failedLoginAttempts: 0,
     lockedUntil: null,
-    sessionVersion: sql`sessionVersion + 1`,
+    sessionVersion: sql`${users.sessionVersion} + 1`,
   }).where(eq(users.id, userId));
 }
 
