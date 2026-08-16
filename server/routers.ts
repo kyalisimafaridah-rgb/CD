@@ -854,7 +854,7 @@ export const appRouter = router({
         const { patientId: newPatientId } = await db.createPatientWithGeneratedId(ctx.user.clinicId, {
           firstName: input.firstName,
           lastName: input.lastName || undefined,
-          dateOfBirth: input.dateOfBirth ? new Date(input.dateOfBirth) : undefined,
+          dateOfBirth: input.dateOfBirth || undefined,
           age: input.age,
           gender: input.gender,
           phone: input.phone,
@@ -926,7 +926,7 @@ export const appRouter = router({
         await db.updatePatient(input.id, {
           firstName: input.firstName,
           lastName: input.lastName,
-          dateOfBirth: input.dateOfBirth ? new Date(input.dateOfBirth) : undefined,
+          dateOfBirth: input.dateOfBirth || undefined,
           age: input.age,
           gender: input.gender,
           phone: input.phone,
@@ -1380,7 +1380,7 @@ export const appRouter = router({
           costPerUnit: input.costPerUnit as any,
           sellingPrice: input.sellingPrice as any,
           lowStockThreshold: input.lowStockThreshold,
-          expiryDate: input.expiryDate ? new Date(input.expiryDate) : undefined,
+          expiryDate: input.expiryDate || undefined,
           batchNumber: input.batchNumber,
           supplier: input.supplier,
         });
