@@ -204,7 +204,7 @@ export default function Login() {
       <div className="w-full max-w-md">
         <div className="flex items-center justify-center gap-3 mb-8">
           <img src="/logo.png" alt="CareDesk" className="w-9 h-9 rounded-md object-cover" />
-          <span className="text-2xl font-bold text-gray-900">CareDesk</span>
+          <span className="text-2xl font-bold text-foreground">CareDesk</span>
         </div>
 
         <Card>
@@ -230,7 +230,7 @@ export default function Login() {
               <TabsContent value="phone"><PhoneLoginTab /></TabsContent>
             </Tabs>
 
-            <p className="text-sm text-gray-600 text-center mt-6">
+            <p className="text-sm text-muted-foreground text-center mt-6">
               New to CareDesk?{" "}
               <Link href={REGISTER_PATH} className="text-green-600 hover:text-green-700 font-medium">
                 Create an account
@@ -240,7 +240,7 @@ export default function Login() {
         </Card>
 
         <p className="text-center mt-6">
-          <Link href="/" className="text-sm text-gray-500 hover:text-gray-700">← Back to home</Link>
+          <Link href="/" className="text-sm text-muted-foreground hover:text-muted-foreground">← Back to home</Link>
         </p>
       </div>
     </div>

@@ -20,7 +20,7 @@ import { TIER_LIMITS } from "@shared/tiers";
 
 const STATUS_COLORS: Record<string, string> = {
   active: "bg-green-100 text-green-700",
-  inactive: "bg-gray-100 text-gray-600",
+  inactive: "bg-muted text-muted-foreground",
   suspended: "bg-red-100 text-red-700",
 };
 
@@ -180,8 +180,8 @@ export default function OwnerDashboard() {
               <ShieldAlert className="w-6 h-6 text-red-600" />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Owner Dashboard</h1>
-              <p className="text-gray-500 text-sm">Platform-wide visibility across all clinics</p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Owner Dashboard</h1>
+              <p className="text-muted-foreground text-sm">Platform-wide visibility across all clinics</p>
             </div>
           </div>
           <div className="flex gap-2">
@@ -205,7 +205,7 @@ export default function OwnerDashboard() {
             <div className="flex items-center justify-between flex-wrap gap-3">
               <div>
                 <p className="text-sm font-medium">{user?.name}</p>
-                <p className="text-xs text-gray-500">{user?.email}</p>
+                <p className="text-xs text-muted-foreground">{user?.email}</p>
               </div>
               <Button variant="destructive" size="sm" onClick={logout}>
                 <LogOut className="w-4 h-4 mr-1" /> Sign out
@@ -229,10 +229,10 @@ export default function OwnerDashboard() {
             </CardHeader>
             <CardContent className="space-y-2">
               {billingIssues.map((issue: any) => (
-                <div key={issue.id} className="bg-white rounded-lg border border-red-200 p-3 text-sm flex justify-between items-start gap-3">
+                <div key={issue.id} className="bg-card rounded-lg border border-red-200 p-3 text-sm flex justify-between items-start gap-3">
                   <div>
                     <p className="font-medium">{issue.clinicName} · <span className="text-red-700">{issue.eventType.replace(/_/g, " ")}</span></p>
-                    {issue.note && <p className="text-xs text-gray-500 mt-0.5">{issue.note}</p>}
+                    {issue.note && <p className="text-xs text-muted-foreground mt-0.5">{issue.note}</p>}
                     <p className="text-xs text-gray-400 mt-0.5">{new Date(issue.createdAt).toLocaleString()}</p>
                   </div>
                   <Button size="sm" variant="outline" className="shrink-0"
@@ -255,11 +255,11 @@ export default function OwnerDashboard() {
                 <div>
                   <p className="text-xs text-emerald-700 font-medium uppercase tracking-wide">Monthly Recurring Revenue</p>
                   <p className="text-3xl font-bold text-emerald-800">UGX {tierBreakdown.mrr.toLocaleString()}</p>
-                  <p className="text-xs text-gray-500 mt-1">{tierBreakdown.payingCount} paying clinic{tierBreakdown.payingCount !== 1 ? "s" : ""} of {stats?.totalClinics || 0} total</p>
+                  <p className="text-xs text-muted-foreground mt-1">{tierBreakdown.payingCount} paying clinic{tierBreakdown.payingCount !== 1 ? "s" : ""} of {stats?.totalClinics || 0} total</p>
                 </div>
                 <div className="flex gap-4 text-center">
                   <div>
-                    <p className="text-lg font-bold text-gray-500">{tierBreakdown.free}</p>
+                    <p className="text-lg font-bold text-muted-foreground">{tierBreakdown.free}</p>
                     <p className="text-[10px] text-gray-400 uppercase">Free</p>
                   </div>
                   <div>
@@ -284,31 +284,31 @@ export default function OwnerDashboard() {
             <Card><CardContent className="pt-5">
               <Building2 className="w-5 h-5 text-blue-600 mb-2" />
               <p className="text-2xl font-bold">{stats?.totalClinics || 0}</p>
-              <p className="text-xs text-gray-500">Total Clinics</p>
+              <p className="text-xs text-muted-foreground">Total Clinics</p>
               <p className="text-xs text-green-600 mt-1">+{stats?.newThisWeek || 0} this week · +{stats?.newThisMonth || 0} this month</p>
             </CardContent></Card>
             <Card><CardContent className="pt-5">
               <CheckCircle className="w-5 h-5 text-green-600 mb-2" />
               <p className="text-2xl font-bold text-green-600">{stats?.activeClinics || 0}</p>
-              <p className="text-xs text-gray-500">Active</p>
+              <p className="text-xs text-muted-foreground">Active</p>
               <p className="text-xs text-red-500 mt-1">{stats?.suspendedClinics || 0} suspended{graceClinics.length > 0 ? ` (${graceClinics.length} in grace period)` : ""}</p>
             </CardContent></Card>
             <Card><CardContent className="pt-5">
               <Users className="w-5 h-5 text-purple-600 mb-2" />
               <p className="text-2xl font-bold">{stats?.totalPatients || 0}</p>
-              <p className="text-xs text-gray-500">Total Patients</p>
+              <p className="text-xs text-muted-foreground">Total Patients</p>
             </CardContent></Card>
             <Card><CardContent className="pt-5">
               <TrendingUp className="w-5 h-5 text-orange-600 mb-2" />
               <p className="text-xl font-bold text-orange-700">UGX {(stats?.totalRevenue || 0).toLocaleString()}</p>
-              <p className="text-xs text-gray-500">Platform Billing Volume</p>
+              <p className="text-xs text-muted-foreground">Platform Billing Volume</p>
               <p className="text-[10px] text-gray-400 mt-1">Clinics' own patient billing — not your revenue</p>
             </CardContent></Card>
             <Card className={((stats?.cancelledThisMonth || 0) + (stats?.downgradedThisMonth || 0)) > 0 ? "border-amber-300" : ""}>
               <CardContent className="pt-5">
                 <XCircle className="w-5 h-5 text-red-500 mb-2" />
                 <p className="text-2xl font-bold">{(stats?.cancelledThisMonth || 0) + (stats?.downgradedThisMonth || 0)}</p>
-                <p className="text-xs text-gray-500">Churned this month</p>
+                <p className="text-xs text-muted-foreground">Churned this month</p>
                 <p className="text-xs text-gray-400 mt-1">{stats?.cancelledThisMonth || 0} cancelled · {stats?.downgradedThisMonth || 0} downgraded · {stats?.upgradedThisMonth || 0} upgraded</p>
               </CardContent>
             </Card>
@@ -396,12 +396,12 @@ export default function OwnerDashboard() {
             ) : filteredClinics.length === 0 ? (
               <div className="text-center py-8">
                 <Building2 className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500">No clinics match this filter</p>
+                <p className="text-muted-foreground">No clinics match this filter</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
-                  <thead className="bg-gray-50 border-b">
+                  <thead className="bg-muted border-b">
                     <tr>
                       <th className="text-left py-3 px-4">Clinic</th>
                       <th className="text-center py-3 px-4">Patients</th>
@@ -416,10 +416,10 @@ export default function OwnerDashboard() {
                   </thead>
                   <tbody className="divide-y">
                     {filteredClinics.map((clinic: any) => (
-                      <tr key={clinic.id} className={`hover:bg-gray-50 ${clinic.subscriptionStatus === "suspended" ? "bg-red-50" : clinic.churnRisk ? "bg-orange-50" : ""}`}>
+                      <tr key={clinic.id} className={`hover:bg-muted ${clinic.subscriptionStatus === "suspended" ? "bg-red-50" : clinic.churnRisk ? "bg-orange-50" : ""}`}>
                         <td className="py-3 px-4">
                           <div className="font-medium">{clinic.name}</div>
-                          {clinic.phone && <div className="text-xs text-gray-500">{clinic.phone}</div>}
+                          {clinic.phone && <div className="text-xs text-muted-foreground">{clinic.phone}</div>}
                           {clinic.churnRisk && <span className="text-xs text-orange-600">⚠ Low activity</span>}
                           {clinic.trialEndingSoon && <span className="text-xs text-yellow-600"> ⏳ Trial ending</span>}
                         </td>
@@ -441,7 +441,7 @@ export default function OwnerDashboard() {
                         </td>
                         <td className="py-3 px-4 text-right text-green-700 font-medium">UGX {clinic.totalRevenue.toLocaleString()}</td>
                         <td className="py-3 px-4">
-                          <div className="flex items-center gap-1 text-xs text-gray-500">
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
                             <Clock className="w-3 h-3" />
                             {fmtDate(clinic.lastActiveAt)}
                           </div>
@@ -450,7 +450,7 @@ export default function OwnerDashboard() {
                           <span className={`text-xs px-2 py-1 rounded-full font-medium ${
                             clinic.subscriptionTier === "pro" ? "bg-purple-100 text-purple-700" :
                             clinic.subscriptionTier === "clinic" ? "bg-blue-100 text-blue-700" :
-                            "bg-gray-100 text-gray-600"
+                            "bg-muted text-muted-foreground"
                           }`}>
                             {clinic.subscriptionTier}
                           </span>
@@ -460,7 +460,7 @@ export default function OwnerDashboard() {
                             {clinic.subscriptionStatus}
                           </span>
                         </td>
-                        <td className="py-3 px-4 text-xs text-gray-500">{fmtDate(clinic.createdAt)}</td>
+                        <td className="py-3 px-4 text-xs text-muted-foreground">{fmtDate(clinic.createdAt)}</td>
                         <td className="py-3 px-4">
                           <div className="flex gap-1 flex-wrap">
                             <Button size="sm" variant="ghost" className="text-xs text-purple-700 p-1 h-7"
@@ -501,27 +501,27 @@ export default function OwnerDashboard() {
       {/* Clinic detail panel */}
       {selectedClinic && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl w-full max-w-lg shadow-2xl space-y-4 p-6">
+          <div className="bg-card rounded-xl w-full max-w-lg shadow-2xl space-y-4 p-6">
             <div className="flex justify-between items-start">
               <div>
                 <h2 className="text-xl font-bold">{selectedClinic.name}</h2>
-                <p className="text-sm text-gray-500">{selectedClinic.city || "No city"} · {selectedClinic.phone || "No phone"}</p>
+                <p className="text-sm text-muted-foreground">{selectedClinic.city || "No city"} · {selectedClinic.phone || "No phone"}</p>
               </div>
-              <button onClick={() => setSelectedClinic(null)} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
+              <button onClick={() => setSelectedClinic(null)} className="text-gray-400 hover:text-muted-foreground text-2xl leading-none">×</button>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center text-sm">
-              <div className="bg-green-50 rounded-lg p-3"><p className="text-2xl font-bold text-green-700">{selectedClinic.patientCount}</p><p className="text-xs text-gray-500">Patients</p></div>
-              <div className="bg-blue-50 rounded-lg p-3"><p className="text-2xl font-bold text-blue-700">{selectedClinic.visitCount}</p><p className="text-xs text-gray-500">Visits</p></div>
-              <div className="bg-purple-50 rounded-lg p-3"><p className="text-sm font-bold text-purple-700">UGX {selectedClinic.totalRevenue.toLocaleString()}</p><p className="text-xs text-gray-500">Revenue</p></div>
+              <div className="bg-green-50 rounded-lg p-3"><p className="text-2xl font-bold text-green-700">{selectedClinic.patientCount}</p><p className="text-xs text-muted-foreground">Patients</p></div>
+              <div className="bg-blue-50 rounded-lg p-3"><p className="text-2xl font-bold text-blue-700">{selectedClinic.visitCount}</p><p className="text-xs text-muted-foreground">Visits</p></div>
+              <div className="bg-purple-50 rounded-lg p-3"><p className="text-sm font-bold text-purple-700">UGX {selectedClinic.totalRevenue.toLocaleString()}</p><p className="text-xs text-muted-foreground">Revenue</p></div>
             </div>
             <div className="text-sm space-y-1">
-              <div className="flex justify-between"><span className="text-gray-500">Status</span><span className={`text-xs px-2 py-1 rounded-full font-medium ${STATUS_COLORS[selectedClinic.subscriptionStatus]}`}>{selectedClinic.subscriptionStatus}</span></div>
-              <div className="flex justify-between"><span className="text-gray-500">Last Active</span><span>{selectedClinic.lastActiveAt ? new Date(selectedClinic.lastActiveAt).toLocaleDateString() : "Never"}</span></div>
-              {selectedClinic.trialEndsAt && <div className="flex justify-between"><span className="text-gray-500">Trial Ends</span><span className={selectedClinic.trialEndingSoon ? "text-yellow-600 font-medium" : ""}>{new Date(selectedClinic.trialEndsAt).toLocaleDateString()}</span></div>}
-              {selectedClinic.lsSubscriptionId && <div className="flex justify-between"><span className="text-gray-500">LS Subscription</span><span className="font-mono text-xs">{selectedClinic.lsSubscriptionId}</span></div>}
+              <div className="flex justify-between"><span className="text-muted-foreground">Status</span><span className={`text-xs px-2 py-1 rounded-full font-medium ${STATUS_COLORS[selectedClinic.subscriptionStatus]}`}>{selectedClinic.subscriptionStatus}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground">Last Active</span><span>{selectedClinic.lastActiveAt ? new Date(selectedClinic.lastActiveAt).toLocaleDateString() : "Never"}</span></div>
+              {selectedClinic.trialEndsAt && <div className="flex justify-between"><span className="text-muted-foreground">Trial Ends</span><span className={selectedClinic.trialEndingSoon ? "text-yellow-600 font-medium" : ""}>{new Date(selectedClinic.trialEndsAt).toLocaleDateString()}</span></div>}
+              {selectedClinic.lsSubscriptionId && <div className="flex justify-between"><span className="text-muted-foreground">LS Subscription</span><span className="font-mono text-xs">{selectedClinic.lsSubscriptionId}</span></div>}
             </div>
             <div className="pt-2 border-t space-y-1">
-              <p className="text-xs text-gray-500">Subscription tier</p>
+              <p className="text-xs text-muted-foreground">Subscription tier</p>
               <div className="flex gap-2">
                 <Select
                   value={selectedClinic.subscriptionTier}
@@ -540,7 +540,7 @@ export default function OwnerDashboard() {
             </div>
 
             <div className="pt-2 border-t">
-              <p className="text-xs text-gray-500 mb-2">Impersonate a staff member at this clinic to see what they see:</p>
+              <p className="text-xs text-muted-foreground mb-2">Impersonate a staff member at this clinic to see what they see:</p>
               <ImpersonatePicker
                 clinicId={selectedClinic.id}
                 onImpersonate={(uid) => {
@@ -552,7 +552,7 @@ export default function OwnerDashboard() {
             </div>
 
             <div className="pt-2 border-t">
-              <p className="text-xs text-gray-500 mb-2">Grant platform-admin access to a staff member at this clinic:</p>
+              <p className="text-xs text-muted-foreground mb-2">Grant platform-admin access to a staff member at this clinic:</p>
               <PromotePicker
                 clinicId={selectedClinic.id}
                 onPromote={(uid, name) => {
@@ -590,11 +590,11 @@ export default function OwnerDashboard() {
       {/* Confirm dialog */}
       {confirmAction && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-sm space-y-4 shadow-xl">
+          <div className="bg-card rounded-lg p-6 w-full max-w-sm space-y-4 shadow-xl">
             <h2 className="text-lg font-bold">
               {confirmAction.action === "active" ? "✅ Activate Clinic" : "⛔ Suspend Clinic"}
             </h2>
-            <p className="text-gray-600 text-sm">
+            <p className="text-muted-foreground text-sm">
               {confirmAction.action === "active"
                 ? `Activate "${confirmAction.name}"? Their staff will regain full access immediately.`
                 : `Suspend "${confirmAction.name}"? They will lose access until reactivated.`}
@@ -713,14 +713,14 @@ function MessageClinicDialog({
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl w-full max-w-md shadow-2xl space-y-4 p-6">
+      <div className="bg-card rounded-xl w-full max-w-md shadow-2xl space-y-4 p-6">
         <div className="flex justify-between items-start">
           <h2 className="text-lg font-bold">Message {clinic.name}</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
+          <button onClick={onClose} className="text-gray-400 hover:text-muted-foreground text-2xl leading-none">×</button>
         </div>
         <div className="space-y-3">
           <div>
-            <label className="block text-xs text-gray-500 mb-1">Send via</label>
+            <label className="block text-xs text-muted-foreground mb-1">Send via</label>
             <Select value={channel} onValueChange={(v) => setChannel(v as "email" | "sms" | "both")}>
               <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -759,13 +759,13 @@ function MessageClinicDialog({
 function AuditLogDialog({ entries, onClose }: { entries: any[] | undefined; onClose: () => void }) {
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl w-full max-w-2xl shadow-2xl p-6 max-h-[80vh] flex flex-col">
+      <div className="bg-card rounded-xl w-full max-w-2xl shadow-2xl p-6 max-h-[80vh] flex flex-col">
         <div className="flex justify-between items-start mb-3">
           <div>
             <h2 className="text-lg font-bold">Admin audit log</h2>
-            <p className="text-xs text-gray-500">Every impersonation, status change, tier override, and promotion — across all clinics</p>
+            <p className="text-xs text-muted-foreground">Every impersonation, status change, tier override, and promotion — across all clinics</p>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
+          <button onClick={onClose} className="text-gray-400 hover:text-muted-foreground text-2xl leading-none">×</button>
         </div>
         <div className="overflow-y-auto space-y-2">
           {!entries ? (
@@ -779,7 +779,7 @@ function AuditLogDialog({ entries, onClose }: { entries: any[] | undefined; onCl
                   <span className="font-medium">{e.action.replace(/^ADMIN_/, "").replace(/_/g, " ")}</span>
                   <span className="text-xs text-gray-400">{new Date(e.createdAt).toLocaleString()}</span>
                 </div>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <p className="text-xs text-muted-foreground mt-0.5">
                   By {e.adminName ?? "Unknown"} · {e.clinicName}
                 </p>
                 {e.changes && <p className="text-xs text-gray-400 mt-1 font-mono break-all">{e.changes}</p>}

@@ -25,7 +25,7 @@ const STATUS_COLORS: Record<string, string> = {
   in_progress: "bg-yellow-100 text-yellow-700",
   completed: "bg-green-100 text-green-700",
   cancelled: "bg-red-100 text-red-700",
-  pending: "bg-gray-100 text-gray-700",
+  pending: "bg-muted text-muted-foreground",
 };
 
 // ─── Previous visit sidebar (shown to doctor during active visit) ─────────────
@@ -34,8 +34,8 @@ function PreviousVisitSidebar({ patientId }: { patientId: number }) {
   const { data: history } = trpc.patient.getFullHistory.useQuery({ patientId });
 
   return (
-    <div className="bg-gray-50 rounded-lg p-4 text-sm space-y-3">
-      <p className="font-semibold text-gray-700">Patient Summary</p>
+    <div className="bg-muted rounded-lg p-4 text-sm space-y-3">
+      <p className="font-semibold text-muted-foreground">Patient Summary</p>
       {history?.patient?.allergies && (
         <div className="bg-red-50 border-2 border-red-300 rounded-lg p-3">
           <p className="text-red-700 font-bold text-xs flex items-center gap-1">⚠️ ALLERGIES</p>
@@ -45,28 +45,28 @@ function PreviousVisitSidebar({ patientId }: { patientId: number }) {
       {history ? (
         <>
           <div className="grid grid-cols-3 gap-2 text-xs text-center sm:grid-cols-3">
-            <div className="bg-white rounded p-2">
+            <div className="bg-card rounded p-2">
               <p className="font-bold text-lg text-green-700">{history.totalVisits}</p>
-              <p className="text-gray-500">Visits</p>
+              <p className="text-muted-foreground">Visits</p>
             </div>
-            <div className="bg-white rounded p-2">
+            <div className="bg-card rounded p-2">
               <p className="font-bold text-sm text-blue-700">UGX {history.totalSpent.toLocaleString()}</p>
-              <p className="text-gray-500">Paid</p>
+              <p className="text-muted-foreground">Paid</p>
             </div>
-            <div className={`rounded p-2 ${history.totalOwed > 0 ? "bg-red-50" : "bg-white"}`}>
+            <div className={`rounded p-2 ${history.totalOwed > 0 ? "bg-red-50" : "bg-card"}`}>
               <p className={`font-bold text-sm ${history.totalOwed > 0 ? "text-red-700" : "text-gray-400"}`}>
                 UGX {history.totalOwed.toLocaleString()}
               </p>
-              <p className="text-gray-500">Owes</p>
+              <p className="text-muted-foreground">Owes</p>
             </div>
           </div>
           {history.visits.length > 0 && (
             <div>
-              <p className="text-xs font-medium text-gray-500 mb-1">Last Visit</p>
-              <div className="bg-white rounded p-2 text-xs">
+              <p className="text-xs font-medium text-muted-foreground mb-1">Last Visit</p>
+              <div className="bg-card rounded p-2 text-xs">
                 <p className="font-medium">{new Date(history.visits[0].visitDate).toLocaleDateString("en-UG", { day: "numeric", month: "short", year: "numeric" })}</p>
-                {history.visits[0].diagnosis && <p className="text-gray-600">Dx: {history.visits[0].diagnosis}</p>}
-                {history.visits[0].prescriptionNotes && <p className="text-gray-500 italic">Rx: {history.visits[0].prescriptionNotes}</p>}
+                {history.visits[0].diagnosis && <p className="text-muted-foreground">Dx: {history.visits[0].diagnosis}</p>}
+                {history.visits[0].prescriptionNotes && <p className="text-muted-foreground italic">Rx: {history.visits[0].prescriptionNotes}</p>}
               </div>
             </div>
           )}
@@ -325,7 +325,7 @@ function NewVisitDialog({ onCreated }: { onCreated: () => void }) {
               </div>
               {labTemplates && labTemplates.length > 0 && (
                 <select
-                  className="w-full mb-2 px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-600"
+                  className="w-full mb-2 px-3 py-2 border border-gray-300 rounded-md text-sm text-muted-foreground"
                   value=""
                   onChange={(e) => {
                     const t = labTemplates.find((t: any) => String(t.id) === e.target.value);
@@ -340,8 +340,8 @@ function NewVisitDialog({ onCreated }: { onCreated: () => void }) {
               )}
               {labTests.length > 0 && (
                 <div className="flex gap-2 mb-1 px-1">
-                  <span className="flex-1 text-[11px] font-medium text-gray-500">Test name</span>
-                  <span className="w-28 text-[11px] font-medium text-gray-500">Cost (UGX)</span>
+                  <span className="flex-1 text-[11px] font-medium text-muted-foreground">Test name</span>
+                  <span className="w-28 text-[11px] font-medium text-muted-foreground">Cost (UGX)</span>
                   <span className="w-9" />{/* spacer matching the delete button's width */}
                 </div>
               )}
@@ -393,18 +393,18 @@ function NewVisitDialog({ onCreated }: { onCreated: () => void }) {
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     <div className="space-y-0.5">
-                      <span className="block text-[11px] font-medium text-gray-500">Drug name</span>
+                      <span className="block text-[11px] font-medium text-muted-foreground">Drug name</span>
                       <Input placeholder="Drug name" aria-label="Drug name" value={drug.drugName}
                         onChange={(e) => { const u = [...prescribedDrugs]; u[i].drugName = e.target.value; setPrescribedDrugs(u); }} />
                     </div>
                     <div className="space-y-0.5">
-                      <span className="block text-[11px] font-medium text-gray-500">Quantity</span>
+                      <span className="block text-[11px] font-medium text-muted-foreground">Quantity</span>
                       <Input type="number" placeholder="Qty" aria-label="Quantity"
                         value={drug.quantity === 0 ? "" : drug.quantity}
                         onChange={(e) => { const u = [...prescribedDrugs]; u[i].quantity = e.target.value === "" ? 0 : parseInt(e.target.value) || 0; setPrescribedDrugs(u); }} />
                     </div>
                     <div className="space-y-0.5">
-                      <span className="block text-[11px] font-medium text-gray-500">Price/unit (UGX)</span>
+                      <span className="block text-[11px] font-medium text-muted-foreground">Price/unit (UGX)</span>
                       <Input type="number" placeholder="Price/unit" aria-label="Price per unit (UGX)"
                         value={drug.costPerUnit === 0 ? "" : drug.costPerUnit}
                         onChange={(e) => { const u = [...prescribedDrugs]; u[i].costPerUnit = e.target.value === "" ? 0 : parseFloat(e.target.value) || 0; setPrescribedDrugs(u); }} />
@@ -414,7 +414,7 @@ function NewVisitDialog({ onCreated }: { onCreated: () => void }) {
                     <p className="text-xs text-amber-600">Typed manually — won't deduct from Drug Inventory stock.</p>
                   )}
                   <div className="space-y-0.5">
-                    <span className="block text-[11px] font-medium text-gray-500">Dosage instructions</span>
+                    <span className="block text-[11px] font-medium text-muted-foreground">Dosage instructions</span>
                     <Input placeholder="Dosage instructions" aria-label="Dosage instructions" value={drug.dosage}
                       onChange={(e) => { const u = [...prescribedDrugs]; u[i].dosage = e.target.value; setPrescribedDrugs(u); }} />
                   </div>
@@ -423,7 +423,7 @@ function NewVisitDialog({ onCreated }: { onCreated: () => void }) {
             </div>
 
             {/* Totals */}
-            <div className="bg-gray-50 rounded p-3 text-sm space-y-1">
+            <div className="bg-muted rounded p-3 text-sm space-y-1">
               <div className="flex justify-between"><span>Consultation:</span><span>UGX {consultationFee.toLocaleString()}</span></div>
               <div className="flex justify-between"><span>Lab Tests:</span><span>UGX {totalLabCost.toLocaleString()}</span></div>
               <div className="flex justify-between"><span>Drugs:</span><span>UGX {totalDrugCost.toLocaleString()}</span></div>
@@ -483,8 +483,8 @@ export default function Visits() {
       <div className="space-y-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Visit Registration</h1>
-            <p className="text-gray-600 mt-1">Record patient consultations and treatments</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Visit Registration</h1>
+            <p className="text-muted-foreground mt-1">Record patient consultations and treatments</p>
           </div>
           {canCreate && <NewVisitDialog onCreated={refetch} />}
         </div>
@@ -520,15 +520,15 @@ export default function Visits() {
                     <div key={visit.id} className="p-4 space-y-2">
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
-                          <p className="font-semibold text-gray-900 truncate">{patientName(visit.patientId)}</p>
-                          <p className="text-xs text-gray-500">
+                          <p className="font-semibold text-foreground truncate">{patientName(visit.patientId)}</p>
+                          <p className="text-xs text-muted-foreground">
                             {new Date(visit.visitDate).toLocaleDateString("en-UG", { day: "numeric", month: "short", year: "numeric" })}
                             {visit.chiefComplaint ? ` · ${visit.chiefComplaint}` : ""}
                           </p>
-                          {visit.diagnosis && <p className="text-xs text-gray-700 mt-0.5">Dx: {visit.diagnosis}</p>}
+                          {visit.diagnosis && <p className="text-xs text-muted-foreground mt-0.5">Dx: {visit.diagnosis}</p>}
                         </div>
                         <div className="shrink-0 text-right">
-                          <p className="text-sm font-bold text-gray-900">UGX {Number(visit.consultationFee).toLocaleString()}</p>
+                          <p className="text-sm font-bold text-foreground">UGX {Number(visit.consultationFee).toLocaleString()}</p>
                           <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${STATUS_COLORS[visit.status ?? "completed"]}`}>
                             {visit.status ?? "completed"}
                           </span>
@@ -551,7 +551,7 @@ export default function Visits() {
                 {/* ── Desktop table ────────────────────── */}
                 <div className="hidden sm:block overflow-x-auto">
                   <table className="w-full text-sm">
-                    <thead className="bg-gray-50 border-b">
+                    <thead className="bg-muted border-b">
                       <tr>
                         <th className="text-left py-3 px-4">Patient</th>
                         <th className="text-left py-3 px-4">Date</th>
@@ -564,11 +564,11 @@ export default function Visits() {
                     </thead>
                     <tbody className="divide-y">
                       {filtered.map((visit: any) => (
-                        <tr key={visit.id} className="hover:bg-gray-50">
+                        <tr key={visit.id} className="hover:bg-muted">
                           <td className="py-3 px-4 font-medium">{patientName(visit.patientId)}</td>
                           <td className="py-3 px-4">{new Date(visit.visitDate).toLocaleDateString("en-UG", { day: "numeric", month: "short", year: "numeric" })}</td>
-                          <td className="py-3 px-4 text-gray-600 max-w-[150px] truncate">{visit.chiefComplaint || "—"}</td>
-                          <td className="py-3 px-4 text-gray-600 max-w-[150px] truncate">{visit.diagnosis || "—"}</td>
+                          <td className="py-3 px-4 text-muted-foreground max-w-[150px] truncate">{visit.chiefComplaint || "—"}</td>
+                          <td className="py-3 px-4 text-muted-foreground max-w-[150px] truncate">{visit.diagnosis || "—"}</td>
                           <td className="py-3 px-4">UGX {Number(visit.consultationFee).toLocaleString()}</td>
                           <td className="py-3 px-4">
                             <div className="flex flex-wrap gap-1">

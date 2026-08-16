@@ -383,8 +383,8 @@ export default function Billing() {
     <DashboardLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Billing</h1>
-          <p className="text-gray-600 mt-1">Manage bills, payments, and revenue</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Billing</h1>
+          <p className="text-muted-foreground mt-1">Manage bills, payments, and revenue</p>
         </div>
 
         {/* Tabs */}
@@ -404,10 +404,10 @@ export default function Billing() {
         {activeTab === "bills" && (
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Card><CardContent className="pt-6"><p className="text-sm text-gray-500">Total Bills</p><p className="text-2xl font-bold">{bills?.length ?? 0}</p></CardContent></Card>
-              <Card><CardContent className="pt-6"><p className="text-sm text-gray-500">Revenue Collected</p><p className="text-xl font-bold text-green-600">UGX {totalRevenue.toLocaleString()}</p></CardContent></Card>
-              <Card><CardContent className="pt-6"><p className="text-sm text-gray-500">Outstanding</p><p className="text-xl font-bold text-red-600">UGX {totalOutstanding.toLocaleString()}</p></CardContent></Card>
-              <Card><CardContent className="pt-6"><p className="text-sm text-gray-500">Collection Rate</p><p className="text-2xl font-bold">{collectionRate}%</p></CardContent></Card>
+              <Card><CardContent className="pt-6"><p className="text-sm text-muted-foreground">Total Bills</p><p className="text-2xl font-bold">{bills?.length ?? 0}</p></CardContent></Card>
+              <Card><CardContent className="pt-6"><p className="text-sm text-muted-foreground">Revenue Collected</p><p className="text-xl font-bold text-green-600">UGX {totalRevenue.toLocaleString()}</p></CardContent></Card>
+              <Card><CardContent className="pt-6"><p className="text-sm text-muted-foreground">Outstanding</p><p className="text-xl font-bold text-red-600">UGX {totalOutstanding.toLocaleString()}</p></CardContent></Card>
+              <Card><CardContent className="pt-6"><p className="text-sm text-muted-foreground">Collection Rate</p><p className="text-2xl font-bold">{collectionRate}%</p></CardContent></Card>
             </div>
 
             <Card>
@@ -451,7 +451,7 @@ export default function Billing() {
                             <div className="flex items-start justify-between gap-2">
                               <div className="min-w-0">
                                 <p className="font-semibold text-sm">{patient ? `${patient.firstName} ${patient.lastName || ""}` : "—"}</p>
-                                <p className="text-xs text-gray-500">{bill.billNumber} · {new Date(bill.billDate).toLocaleDateString()}{isVoided && <span className="ml-1 text-red-500">VOIDED</span>}</p>
+                                <p className="text-xs text-muted-foreground">{bill.billNumber} · {new Date(bill.billDate).toLocaleDateString()}{isVoided && <span className="ml-1 text-red-500">VOIDED</span>}</p>
                               </div>
                               <div className="shrink-0 text-right space-y-0.5">
                                 <p className="text-sm font-bold">UGX {Number(bill.grandTotal).toLocaleString()}</p>
@@ -478,7 +478,7 @@ export default function Billing() {
                     {/* ── Desktop table ────────────────────── */}
                     <div className="hidden sm:block overflow-x-auto">
                       <table className="w-full text-sm">
-                        <thead className="bg-gray-50 border-b">
+                        <thead className="bg-muted border-b">
                           <tr>
                             <th className="text-left py-3 px-4">Bill No.</th>
                             <th className="text-left py-3 px-4">Patient</th>
@@ -495,7 +495,7 @@ export default function Billing() {
                             const patient = patientOf(bill.patientId);
                             const isVoided = bill.isVoided;
                             return (
-                              <tr key={bill.id} className={`hover:bg-gray-50 ${isVoided ? "opacity-50" : ""}`}>
+                              <tr key={bill.id} className={`hover:bg-muted ${isVoided ? "opacity-50" : ""}`}>
                                 <td className="py-3 px-4 font-medium">{bill.billNumber}{isVoided && <span className="ml-1 text-xs text-red-500">VOIDED</span>}</td>
                                 <td className="py-3 px-4">{patient ? `${patient.firstName} ${patient.lastName || ""}` : "—"}</td>
                                 <td className="py-3 px-4">{new Date(bill.billDate).toLocaleDateString()}</td>
@@ -570,7 +570,7 @@ export default function Billing() {
                         <div key={d.patient.id} className="p-4 flex items-start justify-between gap-3">
                           <div className="min-w-0 space-y-0.5">
                             <p className="font-semibold text-sm">{d.patient.firstName} {d.patient.lastName || ""}</p>
-                            <p className="text-xs text-gray-500">{d.patient.phone || "No phone"} · {d.billCount} bill{d.billCount !== 1 ? "s" : ""}</p>
+                            <p className="text-xs text-muted-foreground">{d.patient.phone || "No phone"} · {d.billCount} bill{d.billCount !== 1 ? "s" : ""}</p>
                             <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${ageBucketColor(d.oldestBill)}`}>{ageBucket(d.oldestBill)}</span>
                           </div>
                           <div className="shrink-0 text-right space-y-1.5">
@@ -587,7 +587,7 @@ export default function Billing() {
                     {/* ── Desktop table ────────────────────── */}
                     <div className="hidden sm:block overflow-x-auto">
                       <table className="w-full text-sm">
-                        <thead className="bg-gray-50 border-b">
+                        <thead className="bg-muted border-b">
                           <tr>
                             <th className="text-left py-3 px-4">Patient</th>
                             <th className="text-left py-3 px-4">Phone</th>
@@ -599,9 +599,9 @@ export default function Billing() {
                         </thead>
                         <tbody className="divide-y">
                           {(debtors as any[]).sort((a, b) => b.totalOwed - a.totalOwed).map((d) => (
-                            <tr key={d.patient.id} className="hover:bg-gray-50">
+                            <tr key={d.patient.id} className="hover:bg-muted">
                               <td className="py-3 px-4 font-medium">{d.patient.firstName} {d.patient.lastName || ""}</td>
-                              <td className="py-3 px-4 text-gray-600">{d.patient.phone || "—"}</td>
+                              <td className="py-3 px-4 text-muted-foreground">{d.patient.phone || "—"}</td>
                               <td className="py-3 px-4 text-center">{d.billCount}</td>
                               <td className="py-3 px-4 text-right font-bold text-red-700">UGX {d.totalOwed.toLocaleString()}</td>
                               <td className="py-3 px-4"><span className={`text-xs px-2 py-1 rounded-full font-medium ${ageBucketColor(d.oldestBill)}`}>{ageBucket(d.oldestBill)}</span></td>
@@ -634,9 +634,9 @@ export default function Billing() {
       {/* Payment dialog */}
       {payingBill && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-sm space-y-4 shadow-xl">
+          <div className="bg-card rounded-lg p-6 w-full max-w-sm space-y-4 shadow-xl">
             <h2 className="text-lg font-bold">Record Payment — {payingBill.billNumber}</h2>
-            <p className="text-sm text-gray-600">Balance due: <strong>UGX {Number(payingBill.balanceAmount).toLocaleString()}</strong></p>
+            <p className="text-sm text-muted-foreground">Balance due: <strong>UGX {Number(payingBill.balanceAmount).toLocaleString()}</strong></p>
             <div className="space-y-1">
               <Label>Amount Received (UGX)</Label>
               <Input type="number" value={payAmount} onChange={(e) => setPayAmount(parseFloat(e.target.value) || 0)} />

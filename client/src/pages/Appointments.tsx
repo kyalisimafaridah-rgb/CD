@@ -25,7 +25,7 @@ import { EmptyState } from "@/components/EmptyState";
 const STATUS_COLORS: Record<string, string> = {
   scheduled: "bg-blue-100 text-blue-700",
   confirmed: "bg-green-100 text-green-700",
-  completed: "bg-gray-100 text-gray-700",
+  completed: "bg-muted text-muted-foreground",
   cancelled: "bg-red-100 text-red-700",
   no_show:   "bg-orange-100 text-orange-700",
 };
@@ -332,8 +332,8 @@ export default function Appointments() {
         {/* Header */}
         <div className="flex justify-between items-center flex-wrap gap-3">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Appointments</h1>
-            <p className="text-gray-600 mt-1">Schedule and manage patient appointments</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Appointments</h1>
+            <p className="text-muted-foreground mt-1">Schedule and manage patient appointments</p>
           </div>
           <div className="flex gap-2">
             <WalkInDialog onBooked={() => { todayQuery.refetch(); refetch(); }} />
@@ -362,7 +362,7 @@ export default function Appointments() {
             ) : (
               <div className="space-y-2">
                 {todayApts.map((apt) => (
-                  <div key={apt.id} className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between p-3 rounded-lg border bg-white hover:bg-gray-50">
+                  <div key={apt.id} className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between p-3 rounded-lg border bg-card hover:bg-muted">
                     <div className="flex items-start gap-3">
                       <div className="text-center min-w-[50px]">
                         <p className="text-sm font-bold text-green-700">{fmtTime(apt.appointmentDate)}</p>
@@ -370,7 +370,7 @@ export default function Appointments() {
                       </div>
                       <div>
                         <p className="font-medium text-sm">{patientName(apt.patientId)}</p>
-                        {apt.reason && <p className="text-xs text-gray-500">{apt.reason}</p>}
+                        {apt.reason && <p className="text-xs text-muted-foreground">{apt.reason}</p>}
                       </div>
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
@@ -426,8 +426,8 @@ export default function Appointments() {
                           <div className="flex items-start justify-between gap-2">
                             <div className="min-w-0">
                               <p className="font-semibold text-sm">{patientName(apt.patientId)}</p>
-                              <p className="text-xs text-gray-500">{fmt(apt.appointmentDate)} · {apt.duration} min</p>
-                              {apt.reason && <p className="text-xs text-gray-500 mt-0.5">{apt.reason}</p>}
+                              <p className="text-xs text-muted-foreground">{fmt(apt.appointmentDate)} · {apt.duration} min</p>
+                              {apt.reason && <p className="text-xs text-muted-foreground mt-0.5">{apt.reason}</p>}
                             </div>
                             <span className={`shrink-0 text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLORS[apt.status ?? "scheduled"]}`}>
                               {apt.status}
@@ -440,7 +440,7 @@ export default function Appointments() {
                     {/* ── Desktop table ────────────────────── */}
                     <div className="hidden sm:block overflow-x-auto">
                       <table className="w-full text-sm">
-                        <thead className="bg-gray-50 border-b">
+                        <thead className="bg-muted border-b">
                           <tr>
                             <th className="text-left py-3 px-4">Patient</th>
                             <th className="text-left py-3 px-4">Date & Time</th>
@@ -452,11 +452,11 @@ export default function Appointments() {
                         </thead>
                         <tbody className="divide-y">
                           {allApts.map((apt) => (
-                            <tr key={apt.id} className="hover:bg-gray-50">
+                            <tr key={apt.id} className="hover:bg-muted">
                               <td className="py-3 px-4 font-medium">{patientName(apt.patientId)}</td>
                               <td className="py-3 px-4">{fmt(apt.appointmentDate)}</td>
                               <td className="py-3 px-4">{apt.duration} min</td>
-                              <td className="py-3 px-4 text-gray-600">{apt.reason || "—"}</td>
+                              <td className="py-3 px-4 text-muted-foreground">{apt.reason || "—"}</td>
                               <td className="py-3 px-4">
                                 <span className={`text-xs px-2 py-1 rounded-full font-medium ${STATUS_COLORS[apt.status ?? "scheduled"]}`}>{apt.status}</span>
                               </td>

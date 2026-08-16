@@ -21,8 +21,8 @@ function ReportsLockedScreen() {
       <div className="bg-blue-50 rounded-full p-5 mb-6">
         <Lock className="h-10 w-10 text-blue-500" />
       </div>
-      <h2 className="text-2xl font-bold text-gray-900 mb-2">Revenue Reports</h2>
-      <p className="text-gray-500 mb-1 max-w-sm">
+      <h2 className="text-2xl font-bold text-foreground mb-2">Revenue Reports</h2>
+      <p className="text-muted-foreground mb-1 max-w-sm">
         Revenue reports, daily reconciliation, and collection rate analysis are available on the Clinic plan.
       </p>
       <p className="text-gray-400 text-sm mb-8 max-w-sm">
@@ -131,8 +131,8 @@ export default function RevenueReports() {
       <div className="space-y-6">
         <div className="flex justify-between items-center flex-wrap gap-3">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Revenue Reports</h1>
-            <p className="text-gray-600 mt-1">Financial performance and analytics</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Revenue Reports</h1>
+            <p className="text-muted-foreground mt-1">Financial performance and analytics</p>
           </div>
           <Button variant="outline" onClick={handleExport} disabled={!report}>
             <Download className="w-4 h-4 mr-2" />Export CSV
@@ -163,15 +163,15 @@ export default function RevenueReports() {
         {isLoading ? (
           <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-gray-400" /></div>
         ) : !report ? (
-          <div className="text-center py-12"><BarChart3 className="w-12 h-12 text-gray-300 mx-auto mb-3" /><p className="text-gray-500">No data for this period</p></div>
+          <div className="text-center py-12"><BarChart3 className="w-12 h-12 text-gray-300 mx-auto mb-3" /><p className="text-muted-foreground">No data for this period</p></div>
         ) : (
           <>
             {/* Summary cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Card className="border-l-4 border-l-green-500"><CardContent className="pt-5"><p className="text-xs text-gray-500">Total Revenue</p><p className="text-xl font-bold text-green-700">UGX {report.totalRevenue.toLocaleString()}</p></CardContent></Card>
-              <Card className="border-l-4 border-l-blue-500"><CardContent className="pt-5"><p className="text-xs text-gray-500">Bills Raised</p><p className="text-xl font-bold text-blue-700">{report.totalBills}</p></CardContent></Card>
-              <Card className="border-l-4 border-l-red-500"><CardContent className="pt-5"><p className="text-xs text-gray-500">Outstanding</p><p className="text-xl font-bold text-red-700">UGX {report.unpaidAmount.toLocaleString()}</p></CardContent></Card>
-              <Card className="border-l-4 border-l-purple-500"><CardContent className="pt-5"><p className="text-xs text-gray-500">Collection Rate</p><p className="text-xl font-bold text-purple-700">{report.collectionRate}%</p></CardContent></Card>
+              <Card className="border-l-4 border-l-green-500"><CardContent className="pt-5"><p className="text-xs text-muted-foreground">Total Revenue</p><p className="text-xl font-bold text-green-700">UGX {report.totalRevenue.toLocaleString()}</p></CardContent></Card>
+              <Card className="border-l-4 border-l-blue-500"><CardContent className="pt-5"><p className="text-xs text-muted-foreground">Bills Raised</p><p className="text-xl font-bold text-blue-700">{report.totalBills}</p></CardContent></Card>
+              <Card className="border-l-4 border-l-red-500"><CardContent className="pt-5"><p className="text-xs text-muted-foreground">Outstanding</p><p className="text-xl font-bold text-red-700">UGX {report.unpaidAmount.toLocaleString()}</p></CardContent></Card>
+              <Card className="border-l-4 border-l-purple-500"><CardContent className="pt-5"><p className="text-xs text-muted-foreground">Collection Rate</p><p className="text-xl font-bold text-purple-700">{report.collectionRate}%</p></CardContent></Card>
             </div>
 
             {/* Daily revenue bar chart */}
@@ -208,7 +208,7 @@ export default function RevenueReports() {
                           <span className="font-medium">{d.name}</span>
                           <span>UGX {d.value.toLocaleString()} <span className="text-muted-foreground text-xs">({pct}%)</span></span>
                         </div>
-                        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div className="h-2 bg-muted rounded-full overflow-hidden">
                           <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: d.color }} />
                         </div>
                       </div>
@@ -233,7 +233,7 @@ export default function RevenueReports() {
                   ) : (
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">
-                        <thead className="bg-gray-50 border-b">
+                        <thead className="bg-muted border-b">
                           <tr>
                             <th className="text-left py-2 px-4">Doctor</th>
                             <th className="text-center py-2 px-4">Visits</th>
@@ -242,7 +242,7 @@ export default function RevenueReports() {
                         </thead>
                         <tbody className="divide-y">
                           {doctorPerf.map((d: any) => (
-                            <tr key={d.doctorId} className="hover:bg-gray-50">
+                            <tr key={d.doctorId} className="hover:bg-muted">
                               <td className="py-2 px-4 font-medium">{d.doctorName}</td>
                               <td className="py-2 px-4 text-center">{d.visitCount}</td>
                               <td className="py-2 px-4 text-right text-green-700">UGX {d.revenue.toLocaleString()}</td>
@@ -261,11 +261,11 @@ export default function RevenueReports() {
               <CardHeader><CardTitle>Bills in Period ({report.totalBills})</CardTitle></CardHeader>
               <CardContent>
                 {report.bills.length === 0 ? (
-                  <div className="text-center py-8"><BarChart3 className="w-12 h-12 text-gray-300 mx-auto mb-3" /><p className="text-gray-500">No bills in this period</p></div>
+                  <div className="text-center py-8"><BarChart3 className="w-12 h-12 text-gray-300 mx-auto mb-3" /><p className="text-muted-foreground">No bills in this period</p></div>
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
-                      <thead className="bg-gray-50 border-b">
+                      <thead className="bg-muted border-b">
                         <tr>
                           <th className="text-left py-2 px-4">Bill No.</th>
                           <th className="text-left py-2 px-4">Date</th>
@@ -276,7 +276,7 @@ export default function RevenueReports() {
                       </thead>
                       <tbody className="divide-y">
                         {report.bills.map((bill: any) => (
-                          <tr key={bill.id} className="hover:bg-gray-50">
+                          <tr key={bill.id} className="hover:bg-muted">
                             <td className="py-2 px-4 font-medium">{bill.billNumber}</td>
                             <td className="py-2 px-4">{new Date(bill.billDate).toLocaleDateString()}</td>
                             <td className="py-2 px-4 text-right">UGX {Number(bill.grandTotal).toLocaleString()}</td>

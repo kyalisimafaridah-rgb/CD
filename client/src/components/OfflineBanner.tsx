@@ -40,7 +40,7 @@ export function OfflineBanner() {
           needsReview.length > 0
             ? "bg-amber-100 text-amber-900"
             : !isOnline
-            ? "bg-slate-200 text-slate-700"
+            ? "bg-slate-200 text-muted-foreground"
             : "bg-blue-100 text-blue-900"
         }`}
       >
@@ -101,7 +101,7 @@ export function OfflineBanner() {
             )}
             {ownPending.length > 0 && (
               <div className="space-y-2">
-                <p className="text-sm font-medium text-slate-600">Waiting to sync</p>
+                <p className="text-sm font-medium text-muted-foreground">Waiting to sync</p>
                 {ownPending.map((item) => (
                   <div key={item.id} className="border rounded-md p-3 text-sm flex items-center justify-between">
                     <span>{item.label}</span>
@@ -112,12 +112,12 @@ export function OfflineBanner() {
             )}
             {blockedByOtherUser.length > 0 && (
               <div className="space-y-2">
-                <p className="text-sm font-medium text-slate-600">Queued by a colleague</p>
+                <p className="text-sm font-medium text-muted-foreground">Queued by a colleague</p>
                 {blockedByOtherUser.map((item) => (
                   <div key={item.id} className="border rounded-md p-3 text-sm flex items-center justify-between">
                     <div>
                       <div>{item.label}</div>
-                      <div className="text-xs text-slate-500">By {item.queuedByUserName} — will sync once they sign back in on this device</div>
+                      <div className="text-xs text-muted-foreground">By {item.queuedByUserName} — will sync once they sign back in on this device</div>
                     </div>
                     <Badge variant="outline">Waiting</Badge>
                   </div>
@@ -125,7 +125,7 @@ export function OfflineBanner() {
               </div>
             )}
             {pending.length === 0 && needsReview.length === 0 && (
-              <p className="text-sm text-slate-500">Nothing pending — everything's synced.</p>
+              <p className="text-sm text-muted-foreground">Nothing pending — everything's synced.</p>
             )}
           </div>
         </DialogContent>

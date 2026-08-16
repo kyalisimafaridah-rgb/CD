@@ -17,11 +17,11 @@ import { exportCsv } from "@/lib/csv";
 const SMS_STATUS_COLORS: Record<string, string> = {
   sent: "bg-green-100 text-green-700",
   failed: "bg-red-100 text-red-700",
-  skipped: "bg-gray-100 text-gray-500",
+  skipped: "bg-muted text-muted-foreground",
 };
 
 const TIER_COLORS: Record<SubscriptionTier, string> = {
-  free: "bg-gray-100 text-gray-700",
+  free: "bg-muted text-muted-foreground",
   clinic: "bg-blue-100 text-blue-700",
   pro: "bg-purple-100 text-purple-700",
 };
@@ -74,12 +74,12 @@ function SubscriptionCard() {
         {patientPct !== null && (
           <div>
             <div className="flex justify-between text-sm mb-1">
-              <span className="text-gray-600">Patients this month</span>
-              <span className={`font-medium ${patientPct >= 90 ? "text-red-600" : "text-gray-700"}`}>
+              <span className="text-muted-foreground">Patients this month</span>
+              <span className={`font-medium ${patientPct >= 90 ? "text-red-600" : "text-muted-foreground"}`}>
                 {usage.patientsThisMonth} / {limits.maxPatientsPerMonth}
               </span>
             </div>
-            <div className="w-full bg-gray-100 rounded-full h-2">
+            <div className="w-full bg-muted rounded-full h-2">
               <div
                 className={`h-2 rounded-full transition-all ${patientPct >= 90 ? "bg-red-500" : patientPct >= 70 ? "bg-yellow-500" : "bg-green-500"}`}
                 style={{ width: `${patientPct}%` }}
@@ -94,12 +94,12 @@ function SubscriptionCard() {
         {visitPct !== null && (
           <div>
             <div className="flex justify-between text-sm mb-1">
-              <span className="text-gray-600">Visits this month</span>
-              <span className={`font-medium ${visitPct >= 90 ? "text-red-600" : "text-gray-700"}`}>
+              <span className="text-muted-foreground">Visits this month</span>
+              <span className={`font-medium ${visitPct >= 90 ? "text-red-600" : "text-muted-foreground"}`}>
                 {usage.visitsThisMonth} / {limits.maxVisitsPerMonth}
               </span>
             </div>
-            <div className="w-full bg-gray-100 rounded-full h-2">
+            <div className="w-full bg-muted rounded-full h-2">
               <div
                 className={`h-2 rounded-full transition-all ${visitPct >= 90 ? "bg-red-500" : visitPct >= 70 ? "bg-yellow-500" : "bg-green-500"}`}
                 style={{ width: `${visitPct}%` }}
@@ -114,12 +114,12 @@ function SubscriptionCard() {
         {staffPct !== null && (
           <div>
             <div className="flex justify-between text-sm mb-1">
-              <span className="text-gray-600">Staff members</span>
-              <span className={`font-medium ${staffPct >= 100 ? "text-red-600" : "text-gray-700"}`}>
+              <span className="text-muted-foreground">Staff members</span>
+              <span className={`font-medium ${staffPct >= 100 ? "text-red-600" : "text-muted-foreground"}`}>
                 {usage.activeStaff} / {limits.maxStaff}
               </span>
             </div>
-            <div className="w-full bg-gray-100 rounded-full h-2">
+            <div className="w-full bg-muted rounded-full h-2">
               <div
                 className={`h-2 rounded-full transition-all ${staffPct >= 100 ? "bg-red-500" : staffPct >= 70 ? "bg-yellow-500" : "bg-blue-500"}`}
                 style={{ width: `${Math.min(staffPct, 100)}%` }}
@@ -129,17 +129,17 @@ function SubscriptionCard() {
         )}
 
         {tierStatus.subscriptionRenewsAt && (
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-muted-foreground">
             Renews {new Date(tierStatus.subscriptionRenewsAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
           </p>
         )}
 
         {/* What's included in current plan */}
         <div>
-          <p className="text-sm font-medium text-gray-700 mb-2">What's included:</p>
+          <p className="text-sm font-medium text-muted-foreground mb-2">What's included:</p>
           <ul className="space-y-1">
             {TIER_FEATURES[tier as SubscriptionTier].map((f) => (
-              <li key={f} className="flex items-center gap-2 text-sm text-gray-600">
+              <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
                 <CheckCircle className="h-3.5 w-3.5 text-green-500 shrink-0" />
                 {f}
               </li>
@@ -150,14 +150,14 @@ function SubscriptionCard() {
         {/* Upgrade options */}
         {tier === "free" && (
           <div className="border-t pt-4 space-y-3">
-            <p className="text-sm font-semibold text-gray-800">Upgrade your plan</p>
+            <p className="text-sm font-semibold text-foreground">Upgrade your plan</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="border rounded-lg p-3 space-y-2">
                 <p className="font-semibold text-sm">Clinic</p>
-                <p className="text-lg font-bold">UGX 90,000<span className="text-sm font-normal text-gray-500">/mo</span></p>
+                <p className="text-lg font-bold">UGX 90,000<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
                 <ul className="space-y-1">
                   {TIER_FEATURES.clinic.slice(0, 4).map((f) => (
-                    <li key={f} className="text-xs text-gray-600 flex items-start gap-1">
+                    <li key={f} className="text-xs text-muted-foreground flex items-start gap-1">
                       <CheckCircle className="h-3 w-3 text-blue-500 shrink-0 mt-0.5" />{f}
                     </li>
                   ))}
@@ -171,10 +171,10 @@ function SubscriptionCard() {
               <div className="border-2 border-purple-400 rounded-lg p-3 space-y-2 relative">
                 <Badge className="absolute -top-2 left-2 bg-purple-600 text-white text-xs px-1.5 py-0">Best value</Badge>
                 <p className="font-semibold text-sm">Pro</p>
-                <p className="text-lg font-bold">UGX 180,000<span className="text-sm font-normal text-gray-500">/mo</span></p>
+                <p className="text-lg font-bold">UGX 180,000<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
                 <ul className="space-y-1">
                   {TIER_FEATURES.pro.slice(0, 4).map((f) => (
-                    <li key={f} className="text-xs text-gray-600 flex items-start gap-1">
+                    <li key={f} className="text-xs text-muted-foreground flex items-start gap-1">
                       <CheckCircle className="h-3 w-3 text-purple-500 shrink-0 mt-0.5" />{f}
                     </li>
                   ))}
@@ -194,7 +194,7 @@ function SubscriptionCard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium">Need more branches or unlimited staff?</p>
-                <p className="text-xs text-gray-500">Upgrade to Pro — UGX 180,000/month</p>
+                <p className="text-xs text-muted-foreground">Upgrade to Pro — UGX 180,000/month</p>
               </div>
               <Button size="sm" className="bg-purple-600 hover:bg-purple-700 shrink-0"
                 disabled={checkoutMutation.isPending}
@@ -212,8 +212,8 @@ function SubscriptionCard() {
         {tier !== "free" && (
           <div className="border-t pt-4 flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-700">Manage subscription</p>
-              <p className="text-xs text-gray-500">Change plan, update payment method, or cancel</p>
+              <p className="text-sm font-medium text-muted-foreground">Manage subscription</p>
+              <p className="text-xs text-muted-foreground">Change plan, update payment method, or cancel</p>
             </div>
             <Button size="sm" variant="outline" disabled={portalMutation.isPending} onClick={() => portalMutation.mutate()}>
               {portalMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Manage billing"}
@@ -257,8 +257,8 @@ function SmsLogCard() {
           <div className="flex flex-col items-center py-6 text-center gap-3">
             <Lock className="w-8 h-8 text-gray-300" />
             <div>
-              <p className="text-sm font-medium text-gray-700">SMS logs require the Clinic plan</p>
-              <p className="text-xs text-gray-500 mt-1">Track every SMS sent to patients — appointment reminders, payment receipts, and debt reminders.</p>
+              <p className="text-sm font-medium text-muted-foreground">SMS logs require the Clinic plan</p>
+              <p className="text-xs text-muted-foreground mt-1">Track every SMS sent to patients — appointment reminders, payment receipts, and debt reminders.</p>
             </div>
             <Button size="sm" className="bg-blue-600 hover:bg-blue-700 mt-1"
               disabled={checkoutMutation.isPending}
@@ -278,7 +278,7 @@ function SmsLogCard() {
                   {s.failureReason && <p className="text-red-600 truncate">⚠ {s.failureReason}</p>}
                 </div>
                 <div className="text-right flex-shrink-0 space-y-1">
-                  <Badge className={`text-xs ${SMS_STATUS_COLORS[s.status] ?? "bg-gray-100"}`}>{s.status}</Badge>
+                  <Badge className={`text-xs ${SMS_STATUS_COLORS[s.status] ?? "bg-muted"}`}>{s.status}</Badge>
                   <p className="text-muted-foreground">{new Date(s.createdAt).toLocaleDateString()}</p>
                 </div>
               </div>
@@ -327,8 +327,8 @@ function ActivityLogCard() {
           <div className="flex flex-col items-center py-6 text-center gap-3">
             <Lock className="w-8 h-8 text-gray-300" />
             <div>
-              <p className="text-sm font-medium text-gray-700">Activity audit log requires the Clinic plan</p>
-              <p className="text-xs text-gray-500 mt-1">See every action taken in your clinic — who created records, updated roles, voided bills, and more.</p>
+              <p className="text-sm font-medium text-muted-foreground">Activity audit log requires the Clinic plan</p>
+              <p className="text-xs text-muted-foreground mt-1">See every action taken in your clinic — who created records, updated roles, voided bills, and more.</p>
             </div>
             <Button size="sm" className="bg-blue-600 hover:bg-blue-700 mt-1"
               disabled={checkoutMutation.isPending}
@@ -403,8 +403,8 @@ function BranchManagementCard() {
           <div className="flex flex-col items-center py-6 text-center gap-3">
             <Lock className="w-8 h-8 text-gray-300" />
             <div>
-              <p className="text-sm font-medium text-gray-700">Multiple branches require the Pro plan</p>
-              <p className="text-xs text-gray-500 mt-1">Add separate locations under one owner login and switch between them instantly. Each branch keeps its own patients, staff, and billing — for shared cross-branch patient records, contact us.</p>
+              <p className="text-sm font-medium text-muted-foreground">Multiple branches require the Pro plan</p>
+              <p className="text-xs text-muted-foreground mt-1">Add separate locations under one owner login and switch between them instantly. Each branch keeps its own patients, staff, and billing — for shared cross-branch patient records, contact us.</p>
             </div>
             <Button size="sm" className="bg-purple-600 hover:bg-purple-700 mt-1"
               disabled={checkoutMutation.isPending}
@@ -549,8 +549,8 @@ export default function Settings() {
     <DashboardLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
-          <p className="text-gray-600 mt-1">Manage clinic settings and preferences</p>
+          <h1 className="text-3xl font-bold text-foreground">Settings</h1>
+          <p className="text-muted-foreground mt-1">Manage clinic settings and preferences</p>
         </div>
 
         {canManage && (integrationStatus?.smsSandbox || integrationStatus?.emailSandbox) && (
@@ -579,15 +579,15 @@ export default function Settings() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Clinic Name</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Clinic Name</label>
                 <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} disabled={!canManage} placeholder="e.g. Kampala Medical Clinic" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">City</label>
                 <Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} disabled={!canManage} placeholder="e.g. Kampala" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Country</label>
                 <Select value={form.country} onValueChange={(v) => setForm({ ...form, country: v })} disabled={!canManage}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -596,18 +596,18 @@ export default function Settings() {
                     <SelectItem value="Nigeria">Nigeria</SelectItem>
                   </SelectContent>
                 </Select>
-                <p className="text-xs text-gray-500 mt-1">Determines the dial code used for SMS to patients and staff</p>
+                <p className="text-xs text-muted-foreground mt-1">Determines the dial code used for SMS to patients and staff</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Phone</label>
                 <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} disabled={!canManage} placeholder="+256..." />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Email</label>
                 <Input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} disabled={!canManage} placeholder="clinic@email.com" />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Address</label>
                 <Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} disabled={!canManage} placeholder="Street address" />
               </div>
             </div>
@@ -623,14 +623,14 @@ export default function Settings() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Default Consultation Fee (UGX)</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Default Consultation Fee (UGX)</label>
                 <Input type="number" value={form.consultationFee} onChange={(e) => setForm({ ...form, consultationFee: parseFloat(e.target.value) || 0 })} disabled={!canManage} />
-                <p className="text-xs text-gray-500 mt-1">Pre-filled when registering a new visit</p>
+                <p className="text-xs text-muted-foreground mt-1">Pre-filled when registering a new visit</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">MTN MoMo Number</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">MTN MoMo Number</label>
                 <Input value={form.mtnMomoNumber} onChange={(e) => setForm({ ...form, mtnMomoNumber: e.target.value })} disabled={!canManage} placeholder="256..." />
-                <p className="text-xs text-gray-500 mt-1">Displayed on receipts for mobile payments</p>
+                <p className="text-xs text-muted-foreground mt-1">Displayed on receipts for mobile payments</p>
               </div>
             </div>
           </CardContent>
@@ -649,7 +649,7 @@ export default function Settings() {
               ) : smsBalanceQuery.data ? (
                 <p className="text-lg font-semibold">{smsBalanceQuery.data.balance}</p>
               ) : (
-                <p className="text-sm text-gray-500">SMS isn't configured yet. Set up Africa's Talking to send appointment reminders and payment receipts.</p>
+                <p className="text-sm text-muted-foreground">SMS isn't configured yet. Set up Africa's Talking to send appointment reminders and payment receipts.</p>
               )}
             </CardContent>
           </Card>
@@ -670,9 +670,9 @@ export default function Settings() {
             <CardTitle>Your Account</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            <div className="flex justify-between text-sm"><span className="text-gray-500">Name:</span><span className="font-medium">{user?.name}</span></div>
-            <div className="flex justify-between text-sm"><span className="text-gray-500">Email:</span><span className="font-medium">{user?.email || "—"}</span></div>
-            <div className="flex justify-between text-sm"><span className="text-gray-500">Role:</span><span className="font-medium capitalize">{user?.role}</span></div>
+            <div className="flex justify-between text-sm"><span className="text-muted-foreground">Name:</span><span className="font-medium">{user?.name}</span></div>
+            <div className="flex justify-between text-sm"><span className="text-muted-foreground">Email:</span><span className="font-medium">{user?.email || "—"}</span></div>
+            <div className="flex justify-between text-sm"><span className="text-muted-foreground">Role:</span><span className="font-medium capitalize">{user?.role}</span></div>
           </CardContent>
         </Card>
 
@@ -684,7 +684,7 @@ export default function Settings() {
           </Button>
         )}
         {!canManage && (
-          <p className="text-sm text-gray-500">Only managers can edit clinic settings.</p>
+          <p className="text-sm text-muted-foreground">Only managers can edit clinic settings.</p>
         )}
       </div>
     </DashboardLayout>

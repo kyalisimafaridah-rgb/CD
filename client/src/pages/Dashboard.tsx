@@ -26,7 +26,7 @@ function QuickAction({ href, icon: Icon, label }: { href: string; icon: any; lab
       className="flex items-center gap-3 p-4 border rounded-lg hover:border-green-300 hover:bg-green-50 transition-colors group w-full text-left"
     >
       <Icon className="w-5 h-5 text-green-600" />
-      <span className="font-medium text-gray-900 text-sm">{label}</span>
+      <span className="font-medium text-foreground text-sm">{label}</span>
       <ArrowRight className="w-4 h-4 text-gray-400 ml-auto group-hover:text-green-600" />
     </button>
   );
@@ -69,10 +69,10 @@ export default function Dashboard() {
         {/* Header */}
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-start">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
               {isDoctor ? "My Dashboard" : isReceptionist ? "Front Desk" : "Dashboard"}
             </h1>
-            <p className="text-gray-600 mt-1">
+            <p className="text-muted-foreground mt-1">
               Good {new Date().getHours() < 12 ? "morning" : new Date().getHours() < 17 ? "afternoon" : "evening"}, {user?.name?.split(" ")[0]}
             </p>
           </div>
@@ -92,7 +92,7 @@ export default function Dashboard() {
               <Card className="hover:border-green-300 transition-colors cursor-pointer h-full">
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-sm text-gray-600 font-medium">Today's Appointments</p>
+                    <p className="text-sm text-muted-foreground font-medium">Today's Appointments</p>
                     <Calendar className="w-5 h-5 text-green-600 opacity-60" />
                   </div>
                   <p className="text-3xl font-bold">{pendingApts.length}</p>
@@ -100,7 +100,7 @@ export default function Dashboard() {
                   {pendingApts.length > 0 && (
                     <div className="mt-3 space-y-1">
                       {pendingApts.slice(0, 3).map((a) => (
-                        <div key={a.id} className="text-xs text-gray-500 flex gap-2">
+                        <div key={a.id} className="text-xs text-muted-foreground flex gap-2">
                           <span className="text-green-700 font-medium">
                             {new Date(a.appointmentDate).toLocaleTimeString("en-UG", { hour: "2-digit", minute: "2-digit" })}
                           </span>
@@ -117,28 +117,28 @@ export default function Dashboard() {
             {/* Stats */}
             <Card>
               <CardContent className="pt-6">
-                <p className="text-sm text-gray-600 font-medium mb-3">Today's Numbers</p>
+                <p className="text-sm text-muted-foreground font-medium mb-3">Today's Numbers</p>
                 {statsLoading ? (
                   <div className="text-gray-400 text-sm">Loading...</div>
                 ) : (
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Patients seen</span>
+                      <span className="text-muted-foreground">Patients seen</span>
                       <span className="font-bold">{stats?.patientCount ?? 0}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Revenue</span>
+                      <span className="text-muted-foreground">Revenue</span>
                       <span className="font-bold text-green-700">UGX {(stats?.revenueCollected ?? 0).toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Unpaid bills</span>
+                      <span className="text-muted-foreground">Unpaid bills</span>
                       <button onClick={() => navigate("/billing")} className="font-bold text-red-600 hover:underline">
                         {stats?.unpaidBillsCount ?? 0}
                       </button>
                     </div>
                     {canManage && (
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Outstanding</span>
+                        <span className="text-muted-foreground">Outstanding</span>
                         <button onClick={() => navigate("/billing")} className="font-bold text-red-600 hover:underline">
                           UGX {(stats?.unpaidBillsAmount ?? 0).toLocaleString()}
                         </button>
@@ -152,7 +152,7 @@ export default function Dashboard() {
             {/* Urgent alerts */}
             <Card>
               <CardContent className="pt-6">
-                <p className="text-sm text-gray-600 font-medium mb-3">Alerts</p>
+                <p className="text-sm text-muted-foreground font-medium mb-3">Alerts</p>
                 <div className="space-y-2">
                   {followUps && followUps.length > 0 && (
                     <button onClick={() => navigate("/visits")} className="flex items-center gap-2 text-sm text-orange-700 hover:underline">
@@ -250,12 +250,12 @@ export default function Dashboard() {
               {patientLimit !== null && (
                 <div>
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-600">Patients this month</span>
-                    <span className={`font-medium ${patientPct !== null && patientPct >= 90 ? "text-red-600" : "text-gray-700"}`}>
+                    <span className="text-muted-foreground">Patients this month</span>
+                    <span className={`font-medium ${patientPct !== null && patientPct >= 90 ? "text-red-600" : "text-muted-foreground"}`}>
                       {patientsThisMonth} / {patientLimit}
                     </span>
                   </div>
-                  <div className="w-full bg-gray-100 rounded-full h-1.5">
+                  <div className="w-full bg-muted rounded-full h-1.5">
                     <div
                       className={`h-1.5 rounded-full ${patientPct !== null && patientPct >= 90 ? "bg-red-500" : patientPct !== null && patientPct >= 70 ? "bg-yellow-500" : "bg-green-500"}`}
                       style={{ width: `${patientPct ?? 0}%` }}
@@ -266,12 +266,12 @@ export default function Dashboard() {
               {visitLimit !== null && (
                 <div>
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-600">Visits this month</span>
-                    <span className={`font-medium ${visitPct !== null && visitPct >= 90 ? "text-red-600" : "text-gray-700"}`}>
+                    <span className="text-muted-foreground">Visits this month</span>
+                    <span className={`font-medium ${visitPct !== null && visitPct >= 90 ? "text-red-600" : "text-muted-foreground"}`}>
                       {visitsThisMonth} / {visitLimit}
                     </span>
                   </div>
-                  <div className="w-full bg-gray-100 rounded-full h-1.5">
+                  <div className="w-full bg-muted rounded-full h-1.5">
                     <div
                       className={`h-1.5 rounded-full ${visitPct !== null && visitPct >= 90 ? "bg-red-500" : visitPct !== null && visitPct >= 70 ? "bg-yellow-500" : "bg-green-500"}`}
                       style={{ width: `${visitPct ?? 0}%` }}
@@ -282,10 +282,10 @@ export default function Dashboard() {
               {staffLimit !== null && (
                 <div>
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-600">Staff members</span>
-                    <span className="font-medium text-gray-700">{activeStaff} / {staffLimit}</span>
+                    <span className="text-muted-foreground">Staff members</span>
+                    <span className="font-medium text-muted-foreground">{activeStaff} / {staffLimit}</span>
                   </div>
-                  <div className="w-full bg-gray-100 rounded-full h-1.5">
+                  <div className="w-full bg-muted rounded-full h-1.5">
                     <div
                       className="h-1.5 rounded-full bg-blue-500"
                       style={{ width: `${Math.min(100, Math.round((activeStaff / staffLimit) * 100))}%` }}

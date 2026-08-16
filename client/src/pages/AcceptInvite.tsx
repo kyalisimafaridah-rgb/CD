@@ -55,7 +55,7 @@ export default function AcceptInvite() {
       <div className="w-full max-w-md">
         <div className="flex items-center justify-center gap-3 mb-8">
           <Activity className="w-8 h-8 text-green-600" />
-          <span className="text-2xl font-bold text-gray-900">CareDesk</span>
+          <span className="text-2xl font-bold text-foreground">CareDesk</span>
         </div>
 
         <Card>
@@ -130,7 +130,7 @@ export default function AcceptInvite() {
         </Card>
 
         <p className="text-center mt-6">
-          <Link href="/" className="text-sm text-gray-500 hover:text-gray-700">
+          <Link href="/" className="text-sm text-muted-foreground hover:text-muted-foreground">
             ← Back to home
           </Link>
         </p>

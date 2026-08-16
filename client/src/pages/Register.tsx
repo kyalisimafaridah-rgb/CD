@@ -65,7 +65,7 @@ export default function Register() {
       <div className="w-full max-w-md">
         <div className="flex items-center justify-center gap-3 mb-8">
           <img src="/logo.png" alt="CareDesk" className="w-9 h-9 rounded-md object-cover" />
-          <span className="text-2xl font-bold text-gray-900">CareDesk</span>
+          <span className="text-2xl font-bold text-foreground">CareDesk</span>
         </div>
 
         <Card>
@@ -109,7 +109,7 @@ export default function Register() {
               </Button>
             </form>
 
-            <p className="text-sm text-gray-600 text-center mt-6">
+            <p className="text-sm text-muted-foreground text-center mt-6">
               Already have an account?{" "}
               <Link href={LOGIN_PATH} className="text-green-600 hover:text-green-700 font-medium">
                 Sign in
@@ -119,7 +119,7 @@ export default function Register() {
         </Card>
 
         <p className="text-center mt-6">
-          <Link href="/" className="text-sm text-gray-500 hover:text-gray-700">
+          <Link href="/" className="text-sm text-muted-foreground hover:text-muted-foreground">
             ← Back to home
           </Link>
         </p>

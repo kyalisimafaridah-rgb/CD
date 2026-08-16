@@ -24,8 +24,8 @@ function DrugInventoryLockedScreen() {
         <div className="bg-blue-50 rounded-full p-4 mb-4">
           <Lock className="w-10 h-10 text-blue-500" />
         </div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Medicines</h2>
-        <p className="text-gray-500 mb-1 max-w-sm">
+        <h2 className="text-2xl font-bold text-foreground mb-2">Medicines</h2>
+        <p className="text-muted-foreground mb-1 max-w-sm">
           Track stock levels, manage restocking, and automatically deduct drugs during patient visits.
         </p>
         <p className="text-sm text-blue-600 font-medium mb-6">Available on the Clinic plan — UGX 90,000/month</p>
@@ -101,8 +101,8 @@ export default function DrugInventory() {
       <div className="space-y-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Medicines</h1>
-            <p className="text-gray-600 mt-1">Track stock, expiry dates, and low-stock alerts</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Medicines</h1>
+            <p className="text-muted-foreground mt-1">Track stock, expiry dates, and low-stock alerts</p>
           </div>
           {canManage && (
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -145,11 +145,11 @@ export default function DrugInventory() {
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          <Card><CardContent className="pt-6"><p className="text-sm text-gray-500">Total Drugs</p><p className="text-2xl font-bold">{drugs?.length || 0}</p></CardContent></Card>
-          <Card><CardContent className="pt-6"><p className="text-sm text-gray-500 flex items-center gap-1"><AlertTriangle className="w-4 h-4 text-yellow-500" />Low Stock</p><p className="text-2xl font-bold text-yellow-600">{lowStockCount}</p></CardContent></Card>
-          <Card><CardContent className="pt-6"><p className="text-sm text-gray-500 flex items-center gap-1"><AlertTriangle className="w-4 h-4 text-red-500" />Out of Stock</p><p className="text-2xl font-bold text-red-600">{outOfStockCount}</p></CardContent></Card>
-          <Card><CardContent className="pt-6"><p className="text-sm text-gray-500 flex items-center gap-1"><AlertTriangle className="w-4 h-4 text-orange-500" />Expiring ≤30d</p><p className="text-2xl font-bold text-orange-600">{expiringSoonCount}</p></CardContent></Card>
-          <Card><CardContent className="pt-6"><p className="text-sm text-gray-500 flex items-center gap-1"><AlertTriangle className="w-4 h-4 text-red-700" />Expired</p><p className="text-2xl font-bold text-red-700">{expiredCount}</p></CardContent></Card>
+          <Card><CardContent className="pt-6"><p className="text-sm text-muted-foreground">Total Drugs</p><p className="text-2xl font-bold">{drugs?.length || 0}</p></CardContent></Card>
+          <Card><CardContent className="pt-6"><p className="text-sm text-muted-foreground flex items-center gap-1"><AlertTriangle className="w-4 h-4 text-yellow-500" />Low Stock</p><p className="text-2xl font-bold text-yellow-600">{lowStockCount}</p></CardContent></Card>
+          <Card><CardContent className="pt-6"><p className="text-sm text-muted-foreground flex items-center gap-1"><AlertTriangle className="w-4 h-4 text-red-500" />Out of Stock</p><p className="text-2xl font-bold text-red-600">{outOfStockCount}</p></CardContent></Card>
+          <Card><CardContent className="pt-6"><p className="text-sm text-muted-foreground flex items-center gap-1"><AlertTriangle className="w-4 h-4 text-orange-500" />Expiring ≤30d</p><p className="text-2xl font-bold text-orange-600">{expiringSoonCount}</p></CardContent></Card>
+          <Card><CardContent className="pt-6"><p className="text-sm text-muted-foreground flex items-center gap-1"><AlertTriangle className="w-4 h-4 text-red-700" />Expired</p><p className="text-2xl font-bold text-red-700">{expiredCount}</p></CardContent></Card>
         </div>
 
         {/* Search */}
@@ -170,7 +170,7 @@ export default function DrugInventory() {
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
-                  <thead className="bg-gray-50 border-b">
+                  <thead className="bg-muted border-b">
                     <tr>
                       <th className="text-left py-3 px-4">Drug Name</th>
                       <th className="text-left py-3 px-4">Unit</th>
@@ -188,10 +188,10 @@ export default function DrugInventory() {
                       const expired = isExpired(drug);
                       const expiringSoon = isExpiringSoon(drug);
                       return (
-                        <tr key={drug.id} className={`hover:bg-gray-50 ${expired ? "bg-red-100" : isOut ? "bg-red-50" : isLow || expiringSoon ? "bg-yellow-50" : ""}`}>
+                        <tr key={drug.id} className={`hover:bg-muted ${expired ? "bg-red-100" : isOut ? "bg-red-50" : isLow || expiringSoon ? "bg-yellow-50" : ""}`}>
                           <td className="py-3 px-4">
                             <div className="font-medium">{drug.drugName}</div>
-                            {drug.genericName && <div className="text-xs text-gray-500">{drug.genericName}</div>}
+                            {drug.genericName && <div className="text-xs text-muted-foreground">{drug.genericName}</div>}
                           </td>
                           <td className="py-3 px-4">{drug.unit}</td>
                           <td className="py-3 px-4 text-center">
@@ -203,7 +203,7 @@ export default function DrugInventory() {
                           <td className="py-3 px-4 text-right">UGX {Number(drug.sellingPrice).toLocaleString()}</td>
                           <td className="py-3 px-4 text-sm">
                             {drug.expiryDate ? (
-                              <span className={expired ? "text-red-700 font-bold" : expiringSoon ? "text-orange-600 font-medium" : "text-gray-600"}>
+                              <span className={expired ? "text-red-700 font-bold" : expiringSoon ? "text-orange-600 font-medium" : "text-muted-foreground"}>
                                 {new Date(drug.expiryDate).toLocaleDateString()}
                                 {expired && <span className="ml-1 text-xs bg-red-200 text-red-800 px-1 rounded">EXPIRED</span>}
                                 {expiringSoon && <span className="ml-1 text-xs bg-orange-100 text-orange-700 px-1 rounded">SOON</span>}
@@ -237,11 +237,11 @@ export default function DrugInventory() {
       {/* Restock Dialog */}
       {restockDrug && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-sm space-y-4 shadow-xl">
+          <div className="bg-card rounded-lg p-6 w-full max-w-sm space-y-4 shadow-xl">
             <h2 className="text-lg font-bold">Restock — {restockDrug.drugName}</h2>
-            <p className="text-sm text-gray-600">Current stock: <strong>{restockDrug.quantity} {restockDrug.unit}</strong></p>
+            <p className="text-sm text-muted-foreground">Current stock: <strong>{restockDrug.quantity} {restockDrug.unit}</strong></p>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Units to Add</label>
+              <label className="block text-sm font-medium text-muted-foreground mb-1">Units to Add</label>
               <Input type="number" value={restockQty} onChange={(e) => setRestockQty(parseInt(e.target.value) || 0)} />
             </div>
             <div className="flex gap-3">
@@ -264,10 +264,10 @@ function StockHistoryModal({ drug, onClose }: { drug: any; onClose: () => void }
   const { data: history, isLoading } = trpc.drug.stockHistory.useQuery({ drugId: drug.id });
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md space-y-4 shadow-xl max-h-[80vh] overflow-y-auto">
+      <div className="bg-card rounded-lg p-6 w-full max-w-md space-y-4 shadow-xl max-h-[80vh] overflow-y-auto">
         <div className="flex justify-between items-start">
           <h2 className="text-lg font-bold">Stock History — {drug.drugName}</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
+          <button onClick={onClose} className="text-gray-400 hover:text-muted-foreground text-xl leading-none">×</button>
         </div>
         {isLoading ? (
           <div className="flex justify-center py-6"><Loader2 className="h-5 w-5 animate-spin text-gray-400" /></div>
@@ -279,7 +279,7 @@ function StockHistoryModal({ drug, onClose }: { drug: any; onClose: () => void }
               <div key={h.id} className="flex justify-between items-center text-sm border-b pb-2">
                 <div>
                   <p className="font-medium capitalize">{h.transactionType || "Change"}</p>
-                  <p className="text-xs text-gray-500">{new Date(h.createdAt).toLocaleString()}</p>
+                  <p className="text-xs text-muted-foreground">{new Date(h.createdAt).toLocaleString()}</p>
                 </div>
                 <div className="text-right">
                   <p className={`font-bold ${h.quantityChanged > 0 ? "text-green-600" : "text-red-600"}`}>

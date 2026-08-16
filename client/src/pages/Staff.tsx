@@ -212,8 +212,8 @@ export default function Staff() {
     return (
       <DashboardLayout>
         <div className="space-y-2">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Staff</h1>
-          <p className="text-sm text-gray-500">Only managers can view and manage staff.</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Staff</h1>
+          <p className="text-sm text-muted-foreground">Only managers can view and manage staff.</p>
         </div>
       </DashboardLayout>
     );
@@ -224,12 +224,12 @@ export default function Staff() {
       <div className="space-y-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Staff</h1>
-            <p className="text-gray-600 mt-1">Manage who has access to your clinic</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Staff</h1>
+            <p className="text-muted-foreground mt-1">Manage who has access to your clinic</p>
           </div>
           <div className="flex flex-col items-end gap-1">
             {staffLimit !== null && (
-              <span className={`text-xs px-2 py-0.5 rounded-full ${atStaffLimit ? "bg-red-100 text-red-700" : "bg-gray-100 text-gray-600"}`}>
+              <span className={`text-xs px-2 py-0.5 rounded-full ${atStaffLimit ? "bg-red-100 text-red-700" : "bg-muted text-muted-foreground"}`}>
                 {activeStaff}/{staffLimit} staff used
                 {atStaffLimit && tier === "free" && " — upgrade to add more"}
               </span>

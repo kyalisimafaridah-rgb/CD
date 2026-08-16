@@ -158,7 +158,7 @@ function PatientForm({
                   }
                 }}
               />
-              <p className="text-xs text-gray-500">Preferred if known — auto-fills Age and stays accurate every year</p>
+              <p className="text-xs text-muted-foreground">Preferred if known — auto-fills Age and stays accurate every year</p>
             </div>
             <div className="space-y-1">
               <Label>Age {watch("dateOfBirth") && <span className="text-xs text-gray-400">(auto)</span>}</Label>
@@ -221,13 +221,13 @@ function SmsOptOutToggle({ patient }: { patient: Patient }) {
     onError: (e) => toast.error(e.message),
   });
   return (
-    <div className="flex items-center justify-between text-sm bg-gray-50 rounded-lg p-3">
+    <div className="flex items-center justify-between text-sm bg-muted rounded-lg p-3">
       <div>
-        <p className="font-medium text-gray-700">SMS notifications</p>
-        <p className="text-xs text-gray-500">Appointment reminders, payment receipts, and debt reminders</p>
+        <p className="font-medium text-muted-foreground">SMS notifications</p>
+        <p className="text-xs text-muted-foreground">Appointment reminders, payment receipts, and debt reminders</p>
       </div>
       <div className="flex items-center gap-2">
-        <span className="text-xs text-gray-500">{patient.smsOptOut ? "Opted out" : "Enabled"}</span>
+        <span className="text-xs text-muted-foreground">{patient.smsOptOut ? "Opted out" : "Enabled"}</span>
         <Switch
           checked={!patient.smsOptOut}
           disabled={mutation.isPending}
@@ -256,7 +256,7 @@ function PatientProfile({
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
+      <div className="bg-card rounded-xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
         <div className="bg-green-700 text-white px-6 py-4 flex justify-between items-start">
           <div>
             <h2 className="text-lg font-bold">{patient.firstName} {patient.lastName || ""}</h2>
@@ -264,7 +264,7 @@ function PatientProfile({
             {flags.length > 0 && (
               <div className="flex flex-wrap gap-1 mt-1">
                 {flags.map((f) => (
-                  <span key={f} className="text-xs bg-white/20 px-1.5 py-0.5 rounded-full">
+                  <span key={f} className="text-xs bg-card/20 px-1.5 py-0.5 rounded-full">
                     {FLAG_LABELS[f]}
                   </span>
                 ))}
@@ -284,23 +284,23 @@ function PatientProfile({
             <div className="grid grid-cols-3 gap-2 sm:gap-3">
               <div className="bg-green-50 rounded-lg p-3 text-center">
                 <p className="text-2xl font-bold text-green-700">{history.totalVisits}</p>
-                <p className="text-xs text-gray-600">Visits</p>
+                <p className="text-xs text-muted-foreground">Visits</p>
               </div>
               <div className="bg-blue-50 rounded-lg p-3 text-center">
                 <p className="text-sm font-bold text-blue-700">UGX {history.totalSpent.toLocaleString()}</p>
-                <p className="text-xs text-gray-600">Total Paid</p>
+                <p className="text-xs text-muted-foreground">Total Paid</p>
               </div>
-              <div className={`rounded-lg p-3 text-center ${history.totalOwed > 0 ? "bg-red-50" : "bg-gray-50"}`}>
-                <p className={`text-sm font-bold ${history.totalOwed > 0 ? "text-red-700" : "text-gray-500"}`}>
+              <div className={`rounded-lg p-3 text-center ${history.totalOwed > 0 ? "bg-red-50" : "bg-muted"}`}>
+                <p className={`text-sm font-bold ${history.totalOwed > 0 ? "text-red-700" : "text-muted-foreground"}`}>
                   UGX {history.totalOwed.toLocaleString()}
                 </p>
-                <p className="text-xs text-gray-600">Outstanding</p>
+                <p className="text-xs text-muted-foreground">Outstanding</p>
               </div>
             </div>
 
             {(patient.nextOfKin || patient.nextOfKinPhone) && (
-              <div className="text-sm bg-gray-50 rounded-lg p-3">
-                <p className="font-medium text-gray-700 mb-1">Next of Kin</p>
+              <div className="text-sm bg-muted rounded-lg p-3">
+                <p className="font-medium text-muted-foreground mb-1">Next of Kin</p>
                 <p>{patient.nextOfKin || "—"} · {patient.nextOfKinPhone || "—"}</p>
               </div>
             )}
@@ -315,9 +315,9 @@ function PatientProfile({
             {patient.phone && <SmsOptOutToggle patient={patient} />}
 
             <div>
-              <h3 className="font-semibold text-gray-800 mb-3">Visit History</h3>
+              <h3 className="font-semibold text-foreground mb-3">Visit History</h3>
               {history.visits.length === 0 ? (
-                <p className="text-gray-500 text-sm">No visits recorded yet</p>
+                <p className="text-muted-foreground text-sm">No visits recorded yet</p>
               ) : (
                 <div className="space-y-3">
                   {history.visits.map((visit: any) => (
@@ -327,8 +327,8 @@ function PatientProfile({
                           <p className="font-semibold">
                             {new Date(visit.visitDate).toLocaleDateString("en-UG", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
                           </p>
-                          {visit.chiefComplaint && <p className="text-gray-600">Complaint: {visit.chiefComplaint}</p>}
-                          {visit.diagnosis && <p className="text-gray-700 font-medium">Diagnosis: {visit.diagnosis}</p>}
+                          {visit.chiefComplaint && <p className="text-muted-foreground">Complaint: {visit.chiefComplaint}</p>}
+                          {visit.diagnosis && <p className="text-muted-foreground font-medium">Diagnosis: {visit.diagnosis}</p>}
                         </div>
                         <div className="text-right">
                           <p className="font-bold">UGX {Number(visit.consultationFee).toLocaleString()}</p>
@@ -340,13 +340,13 @@ function PatientProfile({
                         </div>
                       </div>
                       {visit.labTests?.length > 0 && (
-                        <p className="mt-1 text-xs text-gray-600"><strong>Lab:</strong> {visit.labTests.map((t: any) => t.testName).join(", ")}</p>
+                        <p className="mt-1 text-xs text-muted-foreground"><strong>Lab:</strong> {visit.labTests.map((t: any) => t.testName).join(", ")}</p>
                       )}
                       {visit.drugs?.length > 0 && (
-                        <p className="mt-1 text-xs text-gray-600"><strong>Drugs:</strong> {visit.drugs.map((d: any) => `${d.drugName} ×${d.quantity}`).join(", ")}</p>
+                        <p className="mt-1 text-xs text-muted-foreground"><strong>Drugs:</strong> {visit.drugs.map((d: any) => `${d.drugName} ×${d.quantity}`).join(", ")}</p>
                       )}
                       {visit.clinicalNotes && (
-                        <p className="mt-2 text-xs text-gray-500 italic">Notes: {visit.clinicalNotes}</p>
+                        <p className="mt-2 text-xs text-muted-foreground italic">Notes: {visit.clinicalNotes}</p>
                       )}
                     </div>
                   ))}
@@ -355,7 +355,7 @@ function PatientProfile({
             </div>
           </div>
         ) : (
-          <div className="p-6 text-center text-gray-500">Could not load patient history</div>
+          <div className="p-6 text-center text-muted-foreground">Could not load patient history</div>
         )}
       </div>
     </div>
@@ -382,7 +382,7 @@ function FlagsEditor({ patient, onClose }: { patient: Patient; onClose: () => vo
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg p-6 w-full max-w-sm shadow-xl space-y-4">
+      <div className="bg-card rounded-lg p-6 w-full max-w-sm shadow-xl space-y-4">
         <h2 className="text-lg font-bold">Flags — {patient.firstName}</h2>
         <div className="space-y-2">
           {(Object.keys(FLAG_LABELS) as PatientFlag[]).map((f) => (
@@ -597,8 +597,8 @@ export default function Patients() {
         {/* Header */}
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Patients</h1>
-            <p className="text-gray-600 mt-1">Manage patient records and medical history</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Patients</h1>
+            <p className="text-muted-foreground mt-1">Manage patient records and medical history</p>
           </div>
           <div className="flex items-center gap-3 flex-wrap">
             {nearLimit && patientLimit && (
@@ -661,7 +661,7 @@ export default function Patients() {
                   <button
                     key={p.id}
                     onClick={() => openProfile(p)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-sm hover:bg-gray-50 transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-sm hover:bg-muted transition-colors"
                   >
                     <span>{p.firstName} {p.lastName || ""}</span>
                     <span className="text-muted-foreground text-xs">{p.patientId}</span>
@@ -696,15 +696,15 @@ export default function Patients() {
         {showInactive && canDelete && (
           <Card className="border-amber-200">
             <CardContent className="p-4">
-              <p className="text-sm font-medium text-gray-700 mb-3">Deactivated patients — their records are kept, just hidden from the main list</p>
+              <p className="text-sm font-medium text-muted-foreground mb-3">Deactivated patients — their records are kept, just hidden from the main list</p>
               {inactiveLoading ? (
-                <p className="text-sm text-gray-500">Loading...</p>
+                <p className="text-sm text-muted-foreground">Loading...</p>
               ) : !inactivePatients || inactivePatients.length === 0 ? (
                 <p className="text-sm text-gray-400">No deactivated patients</p>
               ) : (
                 <div className="space-y-2">
                   {inactivePatients.map((p: any) => (
-                    <div key={p.id} className="flex justify-between items-center bg-gray-50 rounded p-2 text-sm">
+                    <div key={p.id} className="flex justify-between items-center bg-muted rounded p-2 text-sm">
                       <span>{p.firstName} {p.lastName || ""} — {p.patientId}</span>
                       <Button size="sm" variant="outline" disabled={restoreMutation.isPending}
                         onClick={() => restoreMutation.mutate({ id: p.id })}>
@@ -721,7 +721,7 @@ export default function Patients() {
         {/* Patient list */}
         <Card>
           {isLoading ? (
-            <div className="p-6 text-center text-gray-600">Loading patients...</div>
+            <div className="p-6 text-center text-muted-foreground">Loading patients...</div>
           ) : filteredPatients.length === 0 ? (
             <EmptyState
               icon={Users}
@@ -741,14 +741,14 @@ export default function Patients() {
                 {filteredPatients.map((p) => (
                   <div
                     key={p.id}
-                    className="flex items-start justify-between p-4 hover:bg-gray-50 cursor-pointer"
+                    className="flex items-start justify-between p-4 hover:bg-muted cursor-pointer"
                     onClick={() => openProfile(p)}
                   >
                     <div className="min-w-0 flex-1 space-y-0.5">
-                      <p className="font-semibold text-gray-900 truncate">
+                      <p className="font-semibold text-foreground truncate">
                         {p.firstName} {p.lastName || ""}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-muted-foreground">
                         {p.patientId} · {p.phone || "No phone"}{p.age ? ` · Age ${p.age}` : ""}
                       </p>
                       <PatientFlagBadges flags={p.flags} />
@@ -775,23 +775,23 @@ export default function Patients() {
               {/* ── Desktop table ────────────────────── */}
               <div className="hidden sm:block overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gray-50 border-b border-gray-200">
+                  <thead className="bg-muted border-b border-gray-200">
                     <tr>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">ID</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Name</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Phone</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Age</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Flags</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Actions</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">ID</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Name</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Phone</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Age</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Flags</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
                     {filteredPatients.map((p) => (
-                      <tr key={p.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => openProfile(p)}>
-                        <td className="px-6 py-4 text-sm font-medium text-gray-900">{p.patientId}</td>
-                        <td className="px-6 py-4 text-sm text-gray-900 font-medium">{p.firstName} {p.lastName || ""}</td>
-                        <td className="px-6 py-4 text-sm text-gray-600">{p.phone || "—"}</td>
-                        <td className="px-6 py-4 text-sm text-gray-600">{p.age ?? "—"}</td>
+                      <tr key={p.id} className="hover:bg-muted cursor-pointer" onClick={() => openProfile(p)}>
+                        <td className="px-6 py-4 text-sm font-medium text-foreground">{p.patientId}</td>
+                        <td className="px-6 py-4 text-sm text-foreground font-medium">{p.firstName} {p.lastName || ""}</td>
+                        <td className="px-6 py-4 text-sm text-muted-foreground">{p.phone || "—"}</td>
+                        <td className="px-6 py-4 text-sm text-muted-foreground">{p.age ?? "—"}</td>
                         <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}><PatientFlagBadges flags={p.flags} /></td>
                         <td className="px-6 py-4 text-sm" onClick={(e) => e.stopPropagation()}>
                           <div className="flex items-center gap-2">

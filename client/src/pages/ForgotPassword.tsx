@@ -25,7 +25,7 @@ export default function ForgotPassword() {
       <div className="w-full max-w-md">
         <div className="flex items-center justify-center gap-3 mb-8">
           <Activity className="w-8 h-8 text-green-600" />
-          <span className="text-2xl font-bold text-gray-900">CareDesk</span>
+          <span className="text-2xl font-bold text-foreground">CareDesk</span>
         </div>
 
         <Card>
