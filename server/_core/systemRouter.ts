@@ -2,7 +2,7 @@ import { z } from "zod";
 import { timingSafeEqual } from "crypto";
 import { TRPCError } from "@trpc/server";
 import { notifyOwner } from "./notification";
-import { adminProcedure, publicProcedure, router } from "./trpc";
+import { ownerProcedure, publicProcedure, router } from "./trpc";
 import { ENV } from "./env";
 import { runFullBackup } from "../backup";
 
@@ -25,7 +25,7 @@ export const systemRouter = router({
       ok: true,
     })),
 
-  notifyOwner: adminProcedure
+  notifyOwner: ownerProcedure
     .input(
       z.object({
         title: z.string().min(1, "title is required"),

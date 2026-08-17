@@ -22,6 +22,8 @@ import {
   otpCodes,
   serviceTemplates,
   subscriptionEvents,
+  activationCodes,
+  subscriptionPaymentRequests,
 } from "../drizzle/schema";
 
 // Supabase Postgres connection via postgres.js.
@@ -1559,6 +1561,7 @@ export async function updateClinicBillingInfo(clinicId: number, updates: {
   lsSubscriptionId?: string;
   subscriptionRenewsAt?: Date | null;
   gracePeriodEndsAt?: Date | null;
+  trialEndsAt?: Date | null;
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
@@ -1576,7 +1579,7 @@ export async function updateClinicBillingInfo(clinicId: number, updates: {
  */
 export async function syncBranchTiersToOwner(
   billedClinicId: number,
-  updates: { subscriptionTier?: "free" | "clinic" | "pro"; subscriptionStatus?: "active" | "inactive" | "suspended" }
+  updates: { subscriptionTier?: "free" | "clinic" | "pro"; subscriptionStatus?: "active" | "inactive" | "suspended"; subscriptionRenewsAt?: Date | null }
 ) {
   const db = await getDb();
   if (!db) return;
@@ -1691,4 +1694,195 @@ export async function getPatientFullHistory(patientId: number, clinicId: number)
     totalSpent,
     totalOwed,
   };
+}
+
+
+// ===== MTN MoMo ACTIVATION CODES =====
+
+export async function createActivationCode(data: typeof activationCodes.$inferInsert) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(activationCodes).values(data).returning({ id: activationCodes.id, code: activationCodes.code });
+  return result[0];
+}
+
+export async function getActivationCodeByCode(code: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const normalised = code.trim().toUpperCase().replace(/\s+/g, "");
+  const result = await db.select().from(activationCodes).where(eq(activationCodes.code, normalised)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function listActivationCodes(limit = 100) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db
+    .select({
+      id: activationCodes.id,
+      code: activationCodes.code,
+      tier: activationCodes.tier,
+      durationMonths: activationCodes.durationMonths,
+      amountUgx: activationCodes.amountUgx,
+      payerPhone: activationCodes.payerPhone,
+      note: activationCodes.note,
+      createdAt: activationCodes.createdAt,
+      codeExpiresAt: activationCodes.codeExpiresAt,
+      redeemedAt: activationCodes.redeemedAt,
+      redeemedByClinicId: activationCodes.redeemedByClinicId,
+      appliedUntil: activationCodes.appliedUntil,
+      revokedAt: activationCodes.revokedAt,
+      clinicName: clinics.name,
+    })
+    .from(activationCodes)
+    .leftJoin(clinics, eq(activationCodes.redeemedByClinicId, clinics.id))
+    .orderBy(desc(activationCodes.createdAt))
+    .limit(limit);
+}
+
+export async function markActivationCodeRedeemed(params: {
+  id: number;
+  clinicId: number;
+  userId: number;
+  appliedUntil: Date;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db
+    .update(activationCodes)
+    .set({
+      redeemedAt: new Date(),
+      redeemedByClinicId: params.clinicId,
+      redeemedByUserId: params.userId,
+      appliedUntil: params.appliedUntil,
+    })
+    .where(and(eq(activationCodes.id, params.id), isNull(activationCodes.redeemedAt), isNull(activationCodes.revokedAt)));
+}
+
+export async function revokeActivationCode(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db
+    .update(activationCodes)
+    .set({ revokedAt: new Date() })
+    .where(and(eq(activationCodes.id, id), isNull(activationCodes.redeemedAt)));
+}
+
+
+// ===== SELF-SERVICE SUBSCRIPTION PAYMENT REQUESTS =====
+
+export async function createPaymentRequest(data: typeof subscriptionPaymentRequests.$inferInsert) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(subscriptionPaymentRequests).values(data).returning({ id: subscriptionPaymentRequests.id });
+  return result[0];
+}
+
+export async function getPaymentRequestById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const rows = await db.select().from(subscriptionPaymentRequests).where(eq(subscriptionPaymentRequests.id, id)).limit(1);
+  return rows[0];
+}
+
+export async function listPendingPaymentRequests(limit = 100) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db
+    .select({
+      id: subscriptionPaymentRequests.id,
+      clinicId: subscriptionPaymentRequests.clinicId,
+      clinicName: clinics.name,
+      tier: subscriptionPaymentRequests.tier,
+      durationMonths: subscriptionPaymentRequests.durationMonths,
+      amountUgx: subscriptionPaymentRequests.amountUgx,
+      payerPhone: subscriptionPaymentRequests.payerPhone,
+      mtnTransactionId: subscriptionPaymentRequests.mtnTransactionId,
+      note: subscriptionPaymentRequests.note,
+      status: subscriptionPaymentRequests.status,
+      createdAt: subscriptionPaymentRequests.createdAt,
+      requestedByUserId: subscriptionPaymentRequests.requestedByUserId,
+    })
+    .from(subscriptionPaymentRequests)
+    .innerJoin(clinics, eq(subscriptionPaymentRequests.clinicId, clinics.id))
+    .where(eq(subscriptionPaymentRequests.status, "pending"))
+    .orderBy(desc(subscriptionPaymentRequests.createdAt))
+    .limit(limit);
+}
+
+export async function listPaymentRequestsForClinic(clinicId: number, limit = 20) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db
+    .select()
+    .from(subscriptionPaymentRequests)
+    .where(eq(subscriptionPaymentRequests.clinicId, clinicId))
+    .orderBy(desc(subscriptionPaymentRequests.createdAt))
+    .limit(limit);
+}
+
+export async function listRecentPaymentRequests(limit = 80) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db
+    .select({
+      id: subscriptionPaymentRequests.id,
+      clinicId: subscriptionPaymentRequests.clinicId,
+      clinicName: clinics.name,
+      tier: subscriptionPaymentRequests.tier,
+      durationMonths: subscriptionPaymentRequests.durationMonths,
+      amountUgx: subscriptionPaymentRequests.amountUgx,
+      payerPhone: subscriptionPaymentRequests.payerPhone,
+      mtnTransactionId: subscriptionPaymentRequests.mtnTransactionId,
+      note: subscriptionPaymentRequests.note,
+      status: subscriptionPaymentRequests.status,
+      createdAt: subscriptionPaymentRequests.createdAt,
+      reviewedAt: subscriptionPaymentRequests.reviewedAt,
+      appliedUntil: subscriptionPaymentRequests.appliedUntil,
+      reviewNote: subscriptionPaymentRequests.reviewNote,
+    })
+    .from(subscriptionPaymentRequests)
+    .innerJoin(clinics, eq(subscriptionPaymentRequests.clinicId, clinics.id))
+    .orderBy(desc(subscriptionPaymentRequests.createdAt))
+    .limit(limit);
+}
+
+export async function updatePaymentRequestStatus(
+  id: number,
+  updates: Partial<typeof subscriptionPaymentRequests.$inferInsert>
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.update(subscriptionPaymentRequests).set(updates).where(eq(subscriptionPaymentRequests.id, id));
+}
+
+
+/**
+ * If a clinic\'s prepaid paid period has ended, persist downgrade to free so
+ * Owner Dashboard, reports, and tier columns stay honest. Idempotent.
+ */
+export async function enforceExpiredPaidPeriod(clinicId: number): Promise<boolean> {
+  const clinic = await getClinicById(clinicId);
+  if (!clinic) return false;
+  const tier = clinic.subscriptionTier;
+  if (tier !== "clinic" && tier !== "pro") return false;
+  if (!clinic.subscriptionRenewsAt) return false;
+  if (clinic.subscriptionRenewsAt.getTime() > Date.now()) return false;
+
+  await updateClinicBillingInfo(clinicId, {
+    subscriptionTier: "free",
+    // keep renewsAt as historical end date for display; do not clear
+  });
+  await syncBranchTiersToOwner(clinicId, {
+    subscriptionTier: "free",
+  });
+  await logSubscriptionEvent({
+    clinicId,
+    eventType: "downgraded",
+    fromTier: tier,
+    toTier: "free",
+    note: `Paid period ended ${clinic.subscriptionRenewsAt.toISOString()} — auto-downgraded to free`,
+    needsReview: false,
+  });
+  return true;
 }

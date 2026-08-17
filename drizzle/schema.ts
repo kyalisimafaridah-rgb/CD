@@ -473,3 +473,81 @@ export const serviceTemplates = pgTable("serviceTemplates", {
 
 export type ServiceTemplate = typeof serviceTemplates.$inferSelect;
 export type InsertServiceTemplate = typeof serviceTemplates.$inferInsert;
+
+
+/**
+ * MTN MoMo activation codes.
+ * Admin generates a code after receiving Mobile Money payment (payer often
+ * puts their WhatsApp number as the MoMo "reason"). Clinic manager redeems
+ * the code in Settings to activate a paid tier for a set duration.
+ */
+export const activationCodes = pgTable(
+  "activationCodes",
+  {
+    id: serial("id").primaryKey(),
+    code: varchar("code", { length: 32 }).notNull().unique(),
+    tier: subscriptionTierEnum("tier").notNull(),
+    /** How long the subscription lasts once redeemed */
+    durationMonths: integer("durationMonths").notNull(),
+    /** Expected amount in UGX (for admin records) */
+    amountUgx: integer("amountUgx"),
+    /** WhatsApp / phone the payer used as MoMo reason */
+    payerPhone: varchar("payerPhone", { length: 120 }),
+    /** Optional free-text note (e.g. MTN transaction ID) */
+    note: text("note"),
+    createdByUserId: integer("createdByUserId").notNull(),
+    /** Code itself expires if not redeemed by this time (optional) */
+    codeExpiresAt: timestamp("codeExpiresAt"),
+    redeemedAt: timestamp("redeemedAt"),
+    redeemedByClinicId: integer("redeemedByClinicId"),
+    redeemedByUserId: integer("redeemedByUserId"),
+    /** Subscription end date applied at redeem time (for audit) */
+    appliedUntil: timestamp("appliedUntil"),
+    revokedAt: timestamp("revokedAt"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  (table) => ({
+    codeUnique: uniqueIndex("activationCodes_code_unique").on(table.code),
+  })
+);
+
+export type ActivationCode = typeof activationCodes.$inferSelect;
+export type InsertActivationCode = typeof activationCodes.$inferInsert;
+
+export const paymentRequestStatusEnum = pgEnum("payment_request_status", [
+  "pending",
+  "approved",
+  "rejected",
+  "cancelled",
+]);
+
+/**
+ * Self-service subscription payment claims.
+ * Clinic manager submits after (or before) MTN MoMo payment; admin one-click
+ * approves to activate the tier — no manual code copy/paste required.
+ * Ready for a future MTN Collections webhook to auto-approve.
+ */
+export const subscriptionPaymentRequests = pgTable("subscriptionPaymentRequests", {
+  id: serial("id").primaryKey(),
+  clinicId: integer("clinicId").notNull(),
+  requestedByUserId: integer("requestedByUserId").notNull(),
+  tier: subscriptionTierEnum("tier").notNull(),
+  durationMonths: integer("durationMonths").notNull(),
+  amountUgx: integer("amountUgx").notNull(),
+  /** WhatsApp / phone used as MoMo reason */
+  /** MoMo reason — clinic uses their CareDesk clinic name */
+  payerPhone: varchar("payerPhone", { length: 120 }).notNull(),
+  /** Optional MTN transaction / financial transaction ID */
+  mtnTransactionId: varchar("mtnTransactionId", { length: 64 }),
+  note: text("note"),
+  status: paymentRequestStatusEnum("status").default("pending").notNull(),
+  reviewedByUserId: integer("reviewedByUserId"),
+  reviewedAt: timestamp("reviewedAt"),
+  reviewNote: text("reviewNote"),
+  /** Set when approved — links to the period granted */
+  appliedUntil: timestamp("appliedUntil"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type SubscriptionPaymentRequest = typeof subscriptionPaymentRequests.$inferSelect;
+export type InsertSubscriptionPaymentRequest = typeof subscriptionPaymentRequests.$inferInsert;

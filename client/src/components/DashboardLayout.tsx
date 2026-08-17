@@ -184,7 +184,11 @@ function DashboardLayoutContent({
   const isCollapsed = state === "collapsed";
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
-  const isAdmin = user?.role === "admin";
+  // Platform-owner check, computed server-side from OWNER_EMAIL so the
+  // actual email never needs to live in client code. Deliberately not the
+  // same as the clinic-level "admin" role (used below in canManage) —
+  // every clinic's first registered user gets that role automatically.
+  const isPlatformOwner = !!(user as any)?.isPlatformOwner;
   const canManage = user?.role === "manager" || user?.role === "admin";
 
   // Admin accounts run the platform, not a clinic — Owner Dashboard is the
@@ -194,20 +198,20 @@ function DashboardLayoutContent({
   // this redirect is the actual enforcement; the nav hiding is just the
   // normal-path UX on top of it.
   useEffect(() => {
-    if (isAdmin && location !== "/owner") {
+    if (isPlatformOwner && location !== "/owner") {
       setLocation("/owner");
     }
-  }, [isAdmin, location, setLocation]);
+  }, [isPlatformOwner, location, setLocation]);
 
-  const reportsMenuItem = canManage && !isAdmin ? [reportsItem] : [];
-  const staffItem = canManage && !isAdmin
+  const reportsMenuItem = canManage && !isPlatformOwner ? [reportsItem] : [];
+  const staffItem = canManage && !isPlatformOwner
     ? [{ icon: UserCog, label: "Staff", path: "/staff", title: "Invite and manage clinic staff" }]
     : [];
-  const adminItem = isAdmin ? [{ icon: ShieldAlert, label: "Owner Dashboard", path: "/owner", title: "Platform-wide clinic overview" }] : [];
+  const adminItem = isPlatformOwner ? [{ icon: ShieldAlert, label: "Owner Dashboard", path: "/owner", title: "Platform-wide clinic overview" }] : [];
   // Admins manage the platform, not a clinic — they don't need Patients,
   // Visits, Billing, Drug Inventory, Appointments, or clinic Settings
   // cluttering their nav. Everyone else keeps the normal clinic menu.
-  const menuItems = isAdmin
+  const menuItems = isPlatformOwner
     ? adminItem
     : [...baseMenuItems, ...reportsMenuItem, ...staffItem, settingsItem, ...adminItem];
   const activeMenuItem = menuItems.find(item => item.path === location);
@@ -423,15 +427,35 @@ function DashboardLayoutContent({
 
       <SidebarInset>
         {accessWarning && (
-          <Alert className="mx-4 mt-4">
+          <Alert className={`mx-4 mt-4 ${
+            accessWarning === "subscription_expired" || accessWarning === "grace_period"
+              ? "border-red-300 bg-red-50"
+              : accessWarning === "subscription_ending"
+                ? "border-amber-300 bg-amber-50"
+                : ""
+          }`}>
             <ShieldAlert className="h-4 w-4" />
             <AlertTitle>
-              {accessWarning === "grace_period" ? "Payment issue with your subscription" : "Upgrade to keep your clinic running smoothly"}
+              {accessWarning === "grace_period"
+                ? "Payment issue with your subscription"
+                : accessWarning === "subscription_ending"
+                  ? "Your paid plan ends soon"
+                  : accessWarning === "subscription_expired"
+                    ? "Paid plan ended — you are on Free"
+                    : accessWarning === "trial_ending"
+                      ? "Your trial is ending soon"
+                      : "Upgrade to keep your clinic running smoothly"}
             </AlertTitle>
             <AlertDescription>
               {accessWarning === "grace_period"
-                ? "We couldn't process your last payment. Please update your billing details to avoid losing access."
-                : "You're on the Free plan. Upgrade to Clinic (UGX 90,000/mo) for unlimited patients, drug inventory, reports, and more."}
+                ? "Please contact support to restore full access. Your data is safe."
+                : accessWarning === "subscription_ending"
+                  ? "Renew via Settings → Subscription (MTN MoMo) before the end date to keep Clinic/Pro features."
+                  : accessWarning === "subscription_expired"
+                    ? "Your prepaid period finished. Free limits apply again. Pay via MTN MoMo under Settings to upgrade."
+                    : accessWarning === "trial_ending"
+                      ? "Upgrade under Settings before your trial ends to avoid interruptions."
+                      : "You're on the Free plan. Upgrade to Clinic (UGX 90,000/mo) for more capacity and features."}
             </AlertDescription>
           </Alert>
         )}
@@ -475,7 +499,7 @@ function DashboardLayoutContent({
             <span className="font-semibold tracking-tight text-foreground truncate flex-1">
               {activeMenuItem?.label ?? "CareDesk"}
             </span>
-            {isAdmin && (
+            {isPlatformOwner && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
@@ -506,12 +530,12 @@ function DashboardLayoutContent({
             </button>
           </div>
         )}
-        <main className={`flex-1 p-4 ${isMobile && !isAdmin ? "pb-24" : ""}`}>
+        <main className={`flex-1 p-4 ${isMobile && !isPlatformOwner ? "pb-24" : ""}`}>
           <div key={location} className="route-enter">{children}</div>
         </main>
       </SidebarInset>
 
-      {isMobile && !isAdmin && (
+      {isMobile && !isPlatformOwner && (
         <nav className="fixed bottom-0 left-0 right-0 z-50 flex items-stretch justify-around border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:backdrop-blur pb-safe">
           {bottomTabItems.map((item) => {
             const isActive = location === item.path;

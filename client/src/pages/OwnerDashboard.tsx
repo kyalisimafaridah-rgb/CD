@@ -12,6 +12,7 @@ import {
 import {
   ShieldAlert, Building2, Users, Stethoscope, CheckCircle, XCircle,
   AlertTriangle, Loader2, TrendingUp, Clock, Eye, Search, Filter, LogOut, Database,
+  KeyRound, Copy,
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -35,16 +36,16 @@ export default function OwnerDashboard() {
 
   const { user, logout } = useAuth();
 
-  // Redirect non-admins away immediately — the tRPC procedures also enforce
-  // this server-side, but this prevents non-admins from seeing the shell.
+  // Redirect non-owners away immediately — the tRPC procedures also enforce
+  // this server-side, but this prevents non-owners from seeing the shell.
   useEffect(() => {
-    if (user && user.role !== "admin") {
+    if (user && !(user as any)?.isPlatformOwner) {
       navigate("/dashboard");
     }
   }, [user, navigate]);
 
-  const { data: stats, isLoading: statsLoading, refetch: refetchStats } = trpc.admin.getStats.useQuery(undefined, { enabled: user?.role === "admin" });
-  const { data: clinics, isLoading: clinicsLoading, refetch } = trpc.admin.getAllClinics.useQuery(undefined, { enabled: user?.role === "admin" });
+  const { data: stats, isLoading: statsLoading, refetch: refetchStats } = trpc.admin.getStats.useQuery(undefined, { enabled: (user as any)?.isPlatformOwner });
+  const { data: clinics, isLoading: clinicsLoading, refetch } = trpc.admin.getAllClinics.useQuery(undefined, { enabled: (user as any)?.isPlatformOwner });
 
   const updateStatus = trpc.admin.updateStatus.useMutation({
     onSuccess: () => { toast.success("Clinic status updated"); setConfirmAction(null); refetch(); refetchStats(); },
@@ -89,14 +90,44 @@ export default function OwnerDashboard() {
   });
 
   const utils = trpc.useUtils();
-  const { data: billingIssues } = trpc.admin.getBillingIssues.useQuery(undefined, { enabled: user?.role === "admin" });
+  const { data: activationCodes, refetch: refetchCodes } = trpc.admin.listActivationCodes.useQuery(undefined, { enabled: (user as any)?.isPlatformOwner });
+  const [codeForm, setCodeForm] = useState({ tier: "clinic" as "clinic" | "pro", durationMonths: 1, amountUgx: "", payerPhone: "", note: "" });
+  const [lastGeneratedCode, setLastGeneratedCode] = useState<string | null>(null);
+  const generateCodeMutation = trpc.admin.generateActivationCode.useMutation({
+    onSuccess: (data) => {
+      setLastGeneratedCode(data.code);
+      toast.success(`Code generated: ${data.code}`);
+      refetchCodes();
+    },
+    onError: (e) => toast.error(e.message),
+  });
+  const revokeCodeMutation = trpc.admin.revokeActivationCode.useMutation({
+    onSuccess: () => { toast.success("Code revoked"); refetchCodes(); },
+    onError: (e) => toast.error(e.message),
+  });
+  const { data: paymentRequests, refetch: refetchPayReqs } = trpc.admin.listPaymentRequests.useQuery(undefined, { enabled: (user as any)?.isPlatformOwner });
+  const approvePayMutation = trpc.admin.approvePaymentRequest.useMutation({
+    onSuccess: (data) => {
+      toast.success(`Activated until ${new Date(data.appliedUntil).toLocaleDateString()}`);
+      refetchPayReqs();
+      refetch();
+      refetchStats();
+    },
+    onError: (e) => toast.error(e.message),
+  });
+  const rejectPayMutation = trpc.admin.rejectPaymentRequest.useMutation({
+    onSuccess: () => { toast.success("Request rejected"); refetchPayReqs(); },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const { data: billingIssues } = trpc.admin.getBillingIssues.useQuery(undefined, { enabled: (user as any)?.isPlatformOwner });
   const resolveIssueMutation = trpc.admin.resolveBillingIssue.useMutation({
     onSuccess: () => { toast.success("Marked resolved"); utils.admin.getBillingIssues.invalidate(); },
     onError: (e) => toast.error(e.message),
   });
 
   const [showAuditLog, setShowAuditLog] = useState(false);
-  const { data: auditLog } = trpc.admin.getAuditLog.useQuery(undefined, { enabled: showAuditLog && user?.role === "admin" });
+  const { data: auditLog } = trpc.admin.getAuditLog.useQuery(undefined, { enabled: showAuditLog && (user as any)?.isPlatformOwner });
 
   const [messagingClinic, setMessagingClinic] = useState<any | null>(null);
 
@@ -215,6 +246,180 @@ export default function OwnerDashboard() {
               onSubmit={(currentPassword, newPassword) => changePasswordMutation.mutate({ currentPassword, newPassword })}
               pending={changePasswordMutation.isPending}
             />
+          </CardContent>
+        </Card>
+
+        {/* Pending MoMo payment requests — one-click activate */}
+        {paymentRequests && paymentRequests.some((r: any) => r.status === "pending") && (
+          <Card className="border-amber-300 bg-amber-50/40">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base text-amber-900 flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4" />
+                Pending payments ({paymentRequests.filter((r: any) => r.status === "pending").length})
+              </CardTitle>
+              <CardDescription>
+                Match MoMo credits by clinic name (reason) + amount. Approve to activate instantly — no code needed.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {paymentRequests.filter((r: any) => r.status === "pending").map((r: any) => (
+                <div key={r.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-md border bg-card p-3 text-sm">
+                  <div className="min-w-0">
+                    <p className="font-semibold">{r.clinicName}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {r.tier} · {r.durationMonths} mo · <strong>UGX {Number(r.amountUgx).toLocaleString()}</strong>
+                      {" · "}MoMo reason (clinic name): {r.payerPhone}
+                      {r.mtnTransactionId ? ` · Txn: ${r.mtnTransactionId}` : ""}
+                    </p>
+                    <p className="text-[11px] text-gray-400">{new Date(r.createdAt).toLocaleString()}</p>
+                  </div>
+                  <div className="flex gap-2 shrink-0">
+                    <Button size="sm" className="bg-green-600 hover:bg-green-700"
+                      disabled={approvePayMutation.isPending}
+                      onClick={() => approvePayMutation.mutate({ id: r.id })}>
+                      Approve & activate
+                    </Button>
+                    <Button size="sm" variant="outline"
+                      disabled={rejectPayMutation.isPending}
+                      onClick={() => {
+                        const reason = window.prompt("Reason for rejection (shown to clinic):");
+                        if (reason && reason.trim()) rejectPayMutation.mutate({ id: r.id, reviewNote: reason.trim() });
+                      }}>
+                      Reject
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* MTN MoMo activation codes */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <KeyRound className="w-4 h-4 text-green-700" />
+              MTN MoMo activation codes
+            </CardTitle>
+            <CardDescription>
+              Optional fallback: generate a code to send manually. Prefer approving pending payment requests above when clinics self-submit.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Plan</label>
+                <Select value={codeForm.tier} onValueChange={(v) => setCodeForm((f) => ({ ...f, tier: v as "clinic" | "pro" }))}>
+                  <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="clinic">Clinic (UGX 90k/mo)</SelectItem>
+                    <SelectItem value="pro">Pro (UGX 180k/mo)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Duration (months)</label>
+                <Select value={String(codeForm.durationMonths)} onValueChange={(v) => setCodeForm((f) => ({ ...f, durationMonths: Number(v) }))}>
+                  <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {[1, 2, 3, 6, 12].map((m) => (
+                      <SelectItem key={m} value={String(m)}>{m} month{m > 1 ? "s" : ""}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Amount received (UGX)</label>
+                <Input className="h-9" type="number" placeholder="90000" value={codeForm.amountUgx}
+                  onChange={(e) => setCodeForm((f) => ({ ...f, amountUgx: e.target.value }))} />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Clinic name (MoMo reason)</label>
+                <Input className="h-9" placeholder="Exact clinic name" value={codeForm.payerPhone}
+                  onChange={(e) => setCodeForm((f) => ({ ...f, payerPhone: e.target.value }))} />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Note (optional)</label>
+                <Input className="h-9" placeholder="MTN txn id" value={codeForm.note}
+                  onChange={(e) => setCodeForm((f) => ({ ...f, note: e.target.value }))} />
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <Button
+                className="bg-green-600 hover:bg-green-700"
+                disabled={generateCodeMutation.isPending}
+                onClick={() => generateCodeMutation.mutate({
+                  tier: codeForm.tier,
+                  durationMonths: codeForm.durationMonths,
+                  amountUgx: codeForm.amountUgx ? Number(codeForm.amountUgx) : undefined,
+                  payerPhone: codeForm.payerPhone || undefined,
+                  note: codeForm.note || undefined,
+                })}
+              >
+                {generateCodeMutation.isPending ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <KeyRound className="w-4 h-4 mr-1" />}
+                Generate code
+              </Button>
+              {lastGeneratedCode && (
+                <div className="flex items-center gap-2 rounded-md border border-green-200 bg-green-50 px-3 py-1.5">
+                  <code className="font-mono font-bold text-green-800 tracking-wide">{lastGeneratedCode}</code>
+                  <Button
+                    size="sm" variant="ghost" className="h-7 px-2"
+                    onClick={() => { navigator.clipboard.writeText(lastGeneratedCode); toast.success("Copied"); }}
+                  >
+                    <Copy className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            {activationCodes && activationCodes.length > 0 && (
+              <div className="overflow-x-auto max-h-64 border rounded-md">
+                <table className="w-full text-xs">
+                  <thead className="bg-muted sticky top-0">
+                    <tr className="text-left text-muted-foreground">
+                      <th className="p-2">Code</th>
+                      <th className="p-2">Tier</th>
+                      <th className="p-2">Months</th>
+                      <th className="p-2">Payer</th>
+                      <th className="p-2">Status</th>
+                      <th className="p-2">Created</th>
+                      <th className="p-2"></th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {activationCodes.map((c: any) => {
+                      const status = c.revokedAt ? "revoked" : c.redeemedAt ? "used" : c.codeExpiresAt && new Date(c.codeExpiresAt) < new Date() ? "expired" : "available";
+                      return (
+                        <tr key={c.id}>
+                          <td className="p-2 font-mono">{c.code}</td>
+                          <td className="p-2 capitalize">{c.tier}</td>
+                          <td className="p-2">{c.durationMonths}</td>
+                          <td className="p-2">{c.payerPhone || "—"}</td>
+                          <td className="p-2">
+                            <span className={
+                              status === "available" ? "text-green-700" :
+                              status === "used" ? "text-blue-700" :
+                              "text-muted-foreground"
+                            }>
+                              {status}{c.clinicName ? ` · ${c.clinicName}` : ""}
+                            </span>
+                          </td>
+                          <td className="p-2">{new Date(c.createdAt).toLocaleDateString()}</td>
+                          <td className="p-2">
+                            {status === "available" && (
+                              <Button size="sm" variant="ghost" className="h-7 text-red-600"
+                                onClick={() => { if (confirm("Revoke this unused code?")) revokeCodeMutation.mutate({ id: c.id }); }}>
+                                Revoke
+                              </Button>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </CardContent>
         </Card>
 

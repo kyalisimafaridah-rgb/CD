@@ -84,3 +84,18 @@ To go back you would restore that file, switch `package.json` to `mysql2`, and p
 5. Record a payment → balance updates
 6. Add a medicine → stock shows
 7. Book an appointment
+
+## MTN MoMo activation codes
+1. After deploy, run `pnpm db:push` so `activationCodes` table exists.
+2. Admin (Owner Dashboard) generates codes after confirming MoMo payment.
+3. Clinic manager redeems under Settings → Subscription.
+
+
+## Self-service MTN MoMo (payment requests)
+
+1. Clinic: Settings → choose plan → submit payment request (WhatsApp as MoMo reason).
+2. Admin: Owner Dashboard → amber **Pending payments** → **Approve & activate** (instant, no code).
+3. Fallback: still generate activation codes if needed.
+4. After deploy: `pnpm db:push` to create `subscriptionPaymentRequests`.
+
+Full automation later: MTN MoMo Collections (request-to-pay) + webhook can call the same approve path with no admin click.

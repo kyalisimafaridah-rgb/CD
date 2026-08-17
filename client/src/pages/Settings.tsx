@@ -10,7 +10,7 @@ import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { mutationErrorToast } from "@/lib/utils";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { Download, Zap, CheckCircle, Lock, Loader2 } from "lucide-react";
+import { Download, Zap, CheckCircle, Lock, Loader2, KeyRound, Smartphone } from "lucide-react";
 import { TIER_FEATURES, TIER_LABELS, type SubscriptionTier } from "@shared/tiers";
 import { exportCsv } from "@/lib/csv";
 
@@ -27,7 +27,42 @@ const TIER_COLORS: Record<SubscriptionTier, string> = {
 };
 
 function SubscriptionCard() {
+  const utils = trpc.useUtils();
   const { data: tierStatus, isLoading } = trpc.clinic.getTierStatus.useQuery();
+  const { data: clinicInfo } = trpc.clinic.get.useQuery();
+  const [activationCode, setActivationCode] = useState("");
+  const [payForm, setPayForm] = useState({
+    tier: "clinic" as "clinic" | "pro",
+    durationMonths: 1,
+    mtnTransactionId: "",
+  });
+  const { data: myRequests, refetch: refetchRequests } = trpc.clinic.listMyPaymentRequests.useQuery();
+  const requestPayMutation = trpc.clinic.requestSubscriptionPayment.useMutation({
+    onSuccess: (data) => {
+      toast.success(data.message);
+      setPayForm((f) => ({ ...f, mtnTransactionId: "" }));
+      refetchRequests();
+    },
+    onError: (e) => toast.error(e.message),
+  });
+  const cancelRequestMutation = trpc.clinic.cancelMyPaymentRequest.useMutation({
+    onSuccess: () => { toast.success("Request cancelled"); refetchRequests(); },
+    onError: (e) => toast.error(e.message),
+  });
+  const redeemMutation = trpc.clinic.redeemActivationCode.useMutation({
+    onSuccess: (data) => {
+      toast.success(
+        `Activated ${data.tier} plan until ${new Date(data.appliedUntil).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}`
+      );
+      setActivationCode("");
+      utils.clinic.getTierStatus.invalidate();
+      refetchRequests();
+    },
+    onError: (e) => toast.error(e.message),
+  });
+  const expectedAmount =
+    (payForm.tier === "pro" ? 180000 : 90000) * payForm.durationMonths;
+  const pendingRequest = myRequests?.find((r) => r.status === "pending");
   const checkoutMutation = trpc.clinic.getCheckoutUrl.useMutation({
     onSuccess: ({ url }) => { window.location.href = url; },
     onError: (e) => toast.error(e.message),
@@ -41,6 +76,9 @@ function SubscriptionCard() {
   if (!tierStatus) return null;
 
   const { tier, limits, usage } = tierStatus;
+  const renewsAt = tierStatus.subscriptionRenewsAt ? new Date(tierStatus.subscriptionRenewsAt) : null;
+  const warning = (tierStatus as any).warning as string | null | undefined;
+  const paidActive = (tierStatus as any).paidPeriodActive as boolean | undefined;
   const isManager = true; // Settings page is already manager-gated
 
   const patientPct = limits.maxPatientsPerMonth
@@ -128,9 +166,15 @@ function SubscriptionCard() {
           </div>
         )}
 
-        {tierStatus.subscriptionRenewsAt && (
-          <p className="text-xs text-muted-foreground">
-            Renews {new Date(tierStatus.subscriptionRenewsAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
+        {renewsAt && paidActive && (
+          <p className={`text-xs ${warning === "subscription_ending" ? "text-amber-700 font-medium" : "text-muted-foreground"}`}>
+            Paid until {renewsAt.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
+            {warning === "subscription_ending" ? " — renew soon to keep this plan" : ""}
+          </p>
+        )}
+        {warning === "subscription_expired" && (
+          <p className="text-xs text-red-700 font-medium">
+            Your paid period has ended. You are on the Free plan until you pay again.
           </p>
         )}
 
@@ -147,61 +191,136 @@ function SubscriptionCard() {
           </ul>
         </div>
 
-        {/* Upgrade options */}
-        {tier === "free" && (
-          <div className="border-t pt-4 space-y-3">
-            <p className="text-sm font-semibold text-foreground">Upgrade your plan</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="border rounded-lg p-3 space-y-2">
-                <p className="font-semibold text-sm">Clinic</p>
-                <p className="text-lg font-bold">UGX 90,000<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
-                <ul className="space-y-1">
-                  {TIER_FEATURES.clinic.slice(0, 4).map((f) => (
-                    <li key={f} className="text-xs text-muted-foreground flex items-start gap-1">
-                      <CheckCircle className="h-3 w-3 text-blue-500 shrink-0 mt-0.5" />{f}
-                    </li>
-                  ))}
-                </ul>
-                <Button size="sm" className="w-full bg-blue-600 hover:bg-blue-700 text-xs"
-                  disabled={checkoutMutation.isPending}
-                  onClick={() => checkoutMutation.mutate({ plan: "clinic" })}>
-                  <Zap className="h-3 w-3 mr-1" />Upgrade to Clinic
-                </Button>
+        {/* Self-service MTN MoMo */}
+        <div className="border-t pt-4 space-y-4">
+          <div>
+            <p className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <Smartphone className="h-4 w-4 text-green-600" />
+              Upgrade with MTN Mobile Money
+            </p>
+            <ol className="mt-2 text-xs text-muted-foreground space-y-1 list-decimal list-inside">
+              <li>Choose your plan and months below.</li>
+              <li>Send the exact amount via MTN MoMo to the CareDesk number (ask support if needed).</li>
+              <li>For the MoMo <strong>reason / reference</strong>, type your clinic name <strong>exactly</strong> as registered in CareDesk (shown below).</li>
+              <li>Submit this form — we match the payment to your clinic and activate your plan.</li>
+            </ol>
+            {clinicInfo?.name && (
+              <div className="mt-3 rounded-md border border-green-200 bg-card px-3 py-2">
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Use this as MoMo reason</p>
+                <p className="font-semibold text-green-800 text-sm break-all">{clinicInfo.name}</p>
+                <button
+                  type="button"
+                  className="text-[11px] text-green-700 underline mt-1"
+                  onClick={() => {
+                    navigator.clipboard.writeText(clinicInfo.name);
+                    toast.success("Clinic name copied");
+                  }}
+                >
+                  Copy name
+                </button>
               </div>
-              <div className="border-2 border-purple-400 rounded-lg p-3 space-y-2 relative">
-                <Badge className="absolute -top-2 left-2 bg-purple-600 text-white text-xs px-1.5 py-0">Best value</Badge>
-                <p className="font-semibold text-sm">Pro</p>
-                <p className="text-lg font-bold">UGX 180,000<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
-                <ul className="space-y-1">
-                  {TIER_FEATURES.pro.slice(0, 4).map((f) => (
-                    <li key={f} className="text-xs text-muted-foreground flex items-start gap-1">
-                      <CheckCircle className="h-3 w-3 text-purple-500 shrink-0 mt-0.5" />{f}
-                    </li>
-                  ))}
-                </ul>
-                <Button size="sm" className="w-full bg-purple-600 hover:bg-purple-700 text-xs"
-                  disabled={checkoutMutation.isPending}
-                  onClick={() => checkoutMutation.mutate({ plan: "pro" })}>
-                  <Zap className="h-3 w-3 mr-1" />Upgrade to Pro
-                </Button>
-              </div>
-            </div>
+            )}
           </div>
-        )}
 
-        {tier === "clinic" && (
-          <div className="border-t pt-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium">Need more branches or unlimited staff?</p>
-                <p className="text-xs text-muted-foreground">Upgrade to Pro — UGX 180,000/month</p>
-              </div>
-              <Button size="sm" className="bg-purple-600 hover:bg-purple-700 shrink-0"
-                disabled={checkoutMutation.isPending}
-                onClick={() => checkoutMutation.mutate({ plan: "pro" })}>
-                <Zap className="h-3.5 w-3.5 mr-1" />Upgrade
+          {pendingRequest ? (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 space-y-2">
+              <p className="text-sm font-medium text-amber-900">Payment request pending</p>
+              <p className="text-xs text-amber-800">
+                {pendingRequest.tier} · {pendingRequest.durationMonths} month(s) · UGX {Number(pendingRequest.amountUgx).toLocaleString()} · reason: {pendingRequest.payerPhone}
+              </p>
+              <p className="text-xs text-amber-700">Submitted {new Date(pendingRequest.createdAt).toLocaleString()}. You will get access as soon as it is confirmed.</p>
+              <Button size="sm" variant="outline" disabled={cancelRequestMutation.isPending}
+                onClick={() => cancelRequestMutation.mutate({ id: pendingRequest.id })}>
+                Cancel request
               </Button>
             </div>
+          ) : (
+            <div className="rounded-lg border bg-green-50/40 p-3 space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground">Plan</label>
+                  <Select value={payForm.tier} onValueChange={(v) => setPayForm((f) => ({ ...f, tier: v as "clinic" | "pro" }))}>
+                    <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="clinic">Clinic — UGX 90,000/mo</SelectItem>
+                      <SelectItem value="pro">Pro — UGX 180,000/mo</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground">Months</label>
+                  <Select value={String(payForm.durationMonths)} onValueChange={(v) => setPayForm((f) => ({ ...f, durationMonths: Number(v) }))}>
+                    <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {[1, 2, 3, 6, 12].map((m) => (
+                        <SelectItem key={m} value={String(m)}>{m} month{m > 1 ? "s" : ""}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="text-xs font-medium text-muted-foreground">MTN transaction ID (optional but helps matching)</label>
+                  <Input className="h-9" placeholder="If you already paid" value={payForm.mtnTransactionId}
+                    onChange={(e) => setPayForm((f) => ({ ...f, mtnTransactionId: e.target.value }))} />
+                </div>
+              </div>
+              <p className="text-sm font-semibold text-foreground">
+                Amount to send: <span className="text-green-700">UGX {expectedAmount.toLocaleString()}</span>
+              </p>
+              <Button
+                className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
+                disabled={requestPayMutation.isPending || !clinicInfo?.name}
+                onClick={() => requestPayMutation.mutate({
+                  tier: payForm.tier,
+                  durationMonths: payForm.durationMonths,
+                  mtnTransactionId: payForm.mtnTransactionId.trim() || undefined,
+                })}
+              >
+                {requestPayMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
+                Submit payment request
+              </Button>
+            </div>
+          )}
+
+          {myRequests && myRequests.some((r) => r.status !== "pending") && (
+            <div className="text-xs text-muted-foreground space-y-1">
+              <p className="font-medium text-muted-foreground">Recent requests</p>
+              {myRequests.filter((r) => r.status !== "pending").slice(0, 5).map((r) => (
+                <p key={r.id}>
+                  {r.tier} · {r.durationMonths} mo · {r.status}
+                  {r.appliedUntil ? ` · until ${new Date(r.appliedUntil).toLocaleDateString()}` : ""}
+                  {r.reviewNote ? ` — ${r.reviewNote}` : ""}
+                </p>
+              ))}
+            </div>
+          )}
+
+          <details className="text-xs text-muted-foreground">
+            <summary className="cursor-pointer font-medium text-muted-foreground">Have an activation code instead?</summary>
+            <div className="mt-2 flex flex-col sm:flex-row gap-2">
+              <Input
+                value={activationCode}
+                onChange={(e) => setActivationCode(e.target.value.toUpperCase())}
+                placeholder="CD-CLN-XXXX-XXXX"
+                className="font-mono tracking-wide h-9"
+              />
+              <Button
+                variant="outline" className="shrink-0"
+                disabled={redeemMutation.isPending || activationCode.trim().length < 8}
+                onClick={() => redeemMutation.mutate({ code: activationCode.trim() })}
+              >
+                {redeemMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Redeem code"}
+              </Button>
+            </div>
+          </details>
+        </div>
+
+{tier === "clinic" && (
+          <div className="border-t pt-4">
+            <p className="text-sm font-medium">Need more branches or unlimited staff?</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Pay for Pro (UGX 180,000/month) via MTN MoMo and redeem a Pro activation code above.
+            </p>
           </div>
         )}
 
@@ -210,14 +329,12 @@ function SubscriptionCard() {
         )}
 
         {tier !== "free" && (
-          <div className="border-t pt-4 flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Manage subscription</p>
-              <p className="text-xs text-muted-foreground">Change plan, update payment method, or cancel</p>
-            </div>
-            <Button size="sm" variant="outline" disabled={portalMutation.isPending} onClick={() => portalMutation.mutate()}>
-              {portalMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Manage billing"}
-            </Button>
+          <div className="border-t pt-4">
+            <p className="text-sm font-medium text-muted-foreground">Manage subscription</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Paid via MTN MoMo activation codes. To renew or change plan, pay again and redeem a new code above.
+              Contact support if you need help.
+            </p>
           </div>
         )}
       </CardContent>

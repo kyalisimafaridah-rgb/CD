@@ -5,6 +5,13 @@ export const ENV = {
   atUsername: process.env.AT_USERNAME ?? "",
   isProduction: process.env.NODE_ENV === "production",
 
+  // Platform owner's login email. Gates the /owner dashboard and admin.*
+  // router — separate from the per-clinic "admin" role (which every
+  // clinic's first registered user automatically receives). Without this
+  // check, any clinic's first user could see and modify every other
+  // clinic's data via the owner dashboard.
+  ownerEmail: process.env.OWNER_EMAIL ?? "",
+
   // Manus "forge" proxy - still used by server/_core/notification.ts
   // (notifyOwner). Unrelated to file storage (see R2 vars below).
   forgeApiUrl: process.env.BUILT_IN_FORGE_API_URL ?? "",

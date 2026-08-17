@@ -3,6 +3,7 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import type { TrpcContext } from "./context";
 import { getClinicAccessStatus } from "../subscription";
+import { ENV } from "./env";
 
 const t = initTRPC.context<TrpcContext>().create({
   transformer: superjson,
@@ -120,6 +121,33 @@ export const adminProcedure = t.procedure.use(
     const { ctx, next } = opts;
 
     if (!ctx.user || ctx.user.role !== 'admin') {
+      throw new TRPCError({ code: "FORBIDDEN", message: NOT_ADMIN_ERR_MSG });
+    }
+
+    return next({
+      ctx: {
+        ...ctx,
+        user: ctx.user,
+      },
+    });
+  }),
+);
+
+// Gates the /owner platform dashboard and any cross-clinic operation.
+// Deliberately NOT the same as adminProcedure: 'admin' is a per-clinic
+// role that every clinic's first registered user automatically receives,
+// so it says nothing about who owns the platform. This checks the actual
+// logged-in email against OWNER_EMAIL instead. If OWNER_EMAIL isn't set,
+// this fails closed (rejects everyone) rather than granting access.
+export const ownerProcedure = t.procedure.use(
+  t.middleware(async opts => {
+    const { ctx, next } = opts;
+
+    if (
+      !ctx.user ||
+      !ENV.ownerEmail ||
+      ctx.user.email?.toLowerCase() !== ENV.ownerEmail.toLowerCase()
+    ) {
       throw new TRPCError({ code: "FORBIDDEN", message: NOT_ADMIN_ERR_MSG });
     }
 
