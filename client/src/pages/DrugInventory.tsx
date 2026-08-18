@@ -14,10 +14,6 @@ import { EmptyState } from "@/components/EmptyState";
 
 function DrugInventoryLockedScreen() {
   const [, navigate] = useLocation();
-  const checkoutMutation = trpc.clinic.getCheckoutUrl.useMutation({
-    onSuccess: (data) => { window.location.href = data.url; },
-    onError: (e) => toast.error(e.message),
-  });
   return (
     <DashboardLayout>
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
@@ -32,10 +28,8 @@ function DrugInventoryLockedScreen() {
         <div className="flex gap-3">
           <Button
             className="bg-blue-600 hover:bg-blue-700"
-            disabled={checkoutMutation.isPending}
-            onClick={() => checkoutMutation.mutate({ plan: "clinic" })}
+            onClick={() => navigate("/settings?upgrade=clinic")}
           >
-            {checkoutMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
             Upgrade to Clinic
           </Button>
           <Button variant="outline" onClick={() => navigate("/settings")}>

@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "wouter";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -63,14 +62,6 @@ function SubscriptionCard() {
   const expectedAmount =
     (payForm.tier === "pro" ? 180000 : 90000) * payForm.durationMonths;
   const pendingRequest = myRequests?.find((r) => r.status === "pending");
-  const checkoutMutation = trpc.clinic.getCheckoutUrl.useMutation({
-    onSuccess: ({ url }) => { window.location.href = url; },
-    onError: (e) => toast.error(e.message),
-  });
-  const portalMutation = trpc.clinic.getBillingPortalUrl.useMutation({
-    onSuccess: ({ url }) => { window.open(url, "_blank"); },
-    onError: (e) => toast.error(e.message),
-  });
 
   if (isLoading) return null;
   if (!tierStatus) return null;
@@ -94,7 +85,7 @@ function SubscriptionCard() {
     : null;
 
   return (
-    <Card>
+    <Card id="subscription">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
@@ -346,10 +337,6 @@ function SmsLogCard() {
   const { data: tierStatus } = trpc.clinic.getTierStatus.useQuery();
   const smsLogsEnabled = tierStatus?.limits?.smsLogs ?? true;
   const { data: smsLog } = trpc.clinic.getSmsLog.useQuery(undefined, { enabled: smsLogsEnabled });
-  const checkoutMutation = trpc.clinic.getCheckoutUrl.useMutation({
-    onSuccess: (data) => { window.location.href = data.url; },
-    onError: (e) => toast.error(e.message),
-  });
   const handleExport = () => {
     if (!smsLog) return;
     exportCsv("sms-log.csv",
@@ -377,10 +364,8 @@ function SmsLogCard() {
               <p className="text-sm font-medium text-muted-foreground">SMS logs require the Clinic plan</p>
               <p className="text-xs text-muted-foreground mt-1">Track every SMS sent to patients — appointment reminders, payment receipts, and debt reminders.</p>
             </div>
-            <Button size="sm" className="bg-blue-600 hover:bg-blue-700 mt-1"
-              disabled={checkoutMutation.isPending}
-              onClick={() => checkoutMutation.mutate({ plan: "clinic" })}>
-              Upgrade to Clinic — UGX 90,000/mo
+            <Button size="sm" className="bg-blue-600 hover:bg-blue-700 mt-1" asChild>
+              <a href="#subscription">Upgrade to Clinic — UGX 90,000/mo</a>
             </Button>
           </div>
         ) : !smsLog || smsLog.length === 0 ? (
@@ -413,10 +398,6 @@ function ActivityLogCard() {
   const { data: tierStatus } = trpc.clinic.getTierStatus.useQuery();
   const activityLogEnabled = tierStatus?.limits?.activityLog ?? true;
   const { data: log } = trpc.clinic.getActivityLog.useQuery(undefined, { enabled: activityLogEnabled });
-  const checkoutMutation = trpc.clinic.getCheckoutUrl.useMutation({
-    onSuccess: (data) => { window.location.href = data.url; },
-    onError: (e) => toast.error(e.message),
-  });
   const handleExport = () => {
     if (!log) return;
     exportCsv("activity-log.csv",
@@ -447,10 +428,8 @@ function ActivityLogCard() {
               <p className="text-sm font-medium text-muted-foreground">Activity audit log requires the Clinic plan</p>
               <p className="text-xs text-muted-foreground mt-1">See every action taken in your clinic — who created records, updated roles, voided bills, and more.</p>
             </div>
-            <Button size="sm" className="bg-blue-600 hover:bg-blue-700 mt-1"
-              disabled={checkoutMutation.isPending}
-              onClick={() => checkoutMutation.mutate({ plan: "clinic" })}>
-              Upgrade to Clinic — UGX 90,000/mo
+            <Button size="sm" className="bg-blue-600 hover:bg-blue-700 mt-1" asChild>
+              <a href="#subscription">Upgrade to Clinic — UGX 90,000/mo</a>
             </Button>
           </div>
         ) : !log || log.length === 0 ? (
@@ -491,10 +470,6 @@ function BranchManagementCard() {
   const currentBranch = allBranches?.find((b) => b.id === user?.clinicId);
   const [newName, setNewName] = useState("");
 
-  const checkoutMutation = trpc.clinic.getCheckoutUrl.useMutation({
-    onSuccess: (data) => { window.location.href = data.url; },
-  });
-
   const addMutation = trpc.clinic.addBranch.useMutation({
     onSuccess: () => {
       utils.clinic.getMyBranches.invalidate();
@@ -523,10 +498,8 @@ function BranchManagementCard() {
               <p className="text-sm font-medium text-muted-foreground">Multiple branches require the Pro plan</p>
               <p className="text-xs text-muted-foreground mt-1">Add separate locations under one owner login and switch between them instantly. Each branch keeps its own patients, staff, and billing — for shared cross-branch patient records, contact us.</p>
             </div>
-            <Button size="sm" className="bg-purple-600 hover:bg-purple-700 mt-1"
-              disabled={checkoutMutation.isPending}
-              onClick={() => checkoutMutation.mutate({ plan: "pro" })}>
-              Upgrade to Pro — UGX 180,000/mo
+            <Button size="sm" className="bg-purple-600 hover:bg-purple-700 mt-1" asChild>
+              <a href="#subscription">Upgrade to Pro — UGX 180,000/mo</a>
             </Button>
           </div>
         ) : (
@@ -570,11 +543,9 @@ function BranchManagementCard() {
 export default function Settings() {
   const { user } = useAuth();
   const canManage = user?.role === "manager" || user?.role === "admin";
-  const [, navigate] = useLocation();
 
   const { data: clinic, refetch } = trpc.clinic.get.useQuery();
   const { data: tierStatusForUpgrade } = trpc.clinic.getTierStatus.useQuery();
-  const utils = trpc.useUtils();
   const smsBalanceQuery = trpc.clinic.getSmsBalance.useQuery(undefined, { enabled: canManage });
   const { data: integrationStatus } = trpc.clinic.getIntegrationStatus.useQuery(undefined, { enabled: canManage });
   const updateMutation = trpc.clinic.update.useMutation({
@@ -582,65 +553,23 @@ export default function Settings() {
     onError: (e) => toast.error(e.message),
   });
 
-  const autoCheckoutMutation = trpc.clinic.getCheckoutUrl.useMutation({
-    onSuccess: ({ url }) => { window.location.href = url; },
-    onError: (e) => toast.error(e.message),
-  });
-
   // Arrived via a "Get started" click on a specific paid tier from the
-  // landing page — offer that plan's checkout right away instead of leaving
-  // the person to find it manually below.
+  // landing page (carried through registration) — scroll straight to the
+  // subscription section so the MTN MoMo / activation-code flow is right
+  // there, instead of leaving the person to find it manually below.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const requestedPlan = params.get("upgrade");
     if (
       (requestedPlan === "clinic" || requestedPlan === "pro") &&
       canManage &&
-      tierStatusForUpgrade?.tier === "free" &&
-      !autoCheckoutMutation.isPending
+      tierStatusForUpgrade?.tier === "free"
     ) {
       window.history.replaceState({}, "", "/settings");
-      autoCheckoutMutation.mutate({ plan: requestedPlan });
+      document.getElementById("subscription")?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tierStatusForUpgrade, canManage]);
-
-  // Detect return from Lemonsqueezy checkout (?upgraded=1).
-  // Poll the tier status until it's no longer "free", then redirect to dashboard.
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (!params.has("upgraded")) return;
-
-    // Remove the query param from the URL without a full reload
-    window.history.replaceState({}, "", "/settings");
-
-    toast.loading("Activating your plan...", { id: "upgrade" });
-
-    let attempts = 0;
-    const MAX_ATTEMPTS = 20; // poll for up to ~40 seconds
-
-    const interval = setInterval(async () => {
-      attempts++;
-      await utils.clinic.getTierStatus.invalidate();
-      const tierData = utils.clinic.getTierStatus.getData();
-
-      if (tierData && tierData.tier !== "free") {
-        clearInterval(interval);
-        toast.dismiss("upgrade");
-        toast.success(`You're now on the ${tierData.tier.charAt(0).toUpperCase() + tierData.tier.slice(1)} plan! 🎉`);
-        setTimeout(() => navigate("/dashboard"), 1500);
-        return;
-      }
-
-      if (attempts >= MAX_ATTEMPTS) {
-        clearInterval(interval);
-        toast.dismiss("upgrade");
-        toast.error("Plan activation is taking longer than expected. Please refresh in a moment.");
-      }
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   const [form, setForm] = useState({
     name: "", phone: "", email: "", address: "", city: "", country: "Uganda",

@@ -13,9 +13,6 @@ import { useLocation } from "wouter";
 
 function ReportsLockedScreen() {
   const [, navigate] = useLocation();
-  const checkoutMutation = trpc.clinic.getCheckoutUrl.useMutation({
-    onSuccess: ({ url }) => { window.location.href = url; },
-  });
   return (
     <div className="flex flex-col items-center justify-center py-24 px-6 text-center">
       <div className="bg-blue-50 rounded-full p-5 mb-6">
@@ -31,8 +28,7 @@ function ReportsLockedScreen() {
       <div className="flex gap-3">
         <Button
           className="bg-blue-600 hover:bg-blue-700"
-          disabled={checkoutMutation.isPending}
-          onClick={() => checkoutMutation.mutate({ plan: "clinic" })}
+          onClick={() => navigate("/settings?upgrade=clinic")}
         >
           <Zap className="h-4 w-4 mr-2" />
           Upgrade to Clinic — UGX 90,000/mo
