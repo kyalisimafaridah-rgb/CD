@@ -741,7 +741,7 @@ export default function OwnerDashboard() {
                 </Select>
                 {updateTierMutation.isPending && <Loader2 className="w-4 h-4 animate-spin text-gray-400 mt-2" />}
               </div>
-              <p className="text-[11px] text-gray-400">Manual correction only — doesn't touch their actual LemonSqueezy subscription. Use when a webhook edge case needs fixing (see Billing issues above).</p>
+              <p className="text-[11px] text-gray-400">Manual correction only. Use when a payment was confirmed offline (MTN MoMo) but the tier needs a fix.</p>
             </div>
 
             <div className="pt-2 border-t">

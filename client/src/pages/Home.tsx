@@ -50,8 +50,12 @@ export default function Home() {
             <h1 className="text-3xl sm:text-5xl font-bold text-foreground mb-6">
               Clinic Management Built for Uganda
             </h1>
-            <p className="text-xl text-muted-foreground mb-8">
-              Register patients, record visits, track medicines, and monitor revenue — all in UGX, from your phone or computer. Designed so any receptionist or clinician can use it on day one.
+            <p className="text-xl text-muted-foreground mb-4">
+              Patients, visits, and bills in one place — in UGX, on your phone or computer.
+              Built so a receptionist can use it on day one.
+            </p>
+            <p className="text-sm text-muted-foreground mb-8">
+              Free to start. Upgrade later with MTN MoMo when your clinic grows.
             </p>
             <div className="flex gap-4">
               <Link href={REGISTER_PATH}>
@@ -63,7 +67,7 @@ export default function Home() {
                 <Button size="lg" variant="outline">Sign In</Button>
               </Link>
             </div>
-            <p className="text-sm text-muted-foreground mt-4">Free plan available. No credit card required.</p>
+            <p className="text-sm text-muted-foreground mt-4">No card needed. Set up in minutes. Cancel anytime by simply not renewing.</p>
           </div>
           <div className="bg-gradient-to-br from-green-100 to-blue-100 rounded-2xl p-8 h-80 flex items-center justify-center">
             <div className="text-center">

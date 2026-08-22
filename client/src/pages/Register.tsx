@@ -30,7 +30,7 @@ export default function Register() {
 
   // If the person clicked "Get started" on a paid tier's pricing card, carry
   // that intent through registration (accounts always start on Free — a paid
-  // tier requires an authenticated clinicId to check out with LemonSqueezy)
+  // tier is activated later via MTN MoMo self-service in Settings)
   // so Settings can offer the checkout immediately instead of silently
   // dropping them on Free with no trail back to the plan they picked.
   const requestedPlan = new URLSearchParams(window.location.search).get("plan");

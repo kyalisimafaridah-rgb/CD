@@ -24,13 +24,13 @@ function DrugInventoryLockedScreen() {
         <p className="text-muted-foreground mb-1 max-w-sm">
           Track stock levels, manage restocking, and automatically deduct drugs during patient visits.
         </p>
-        <p className="text-sm text-blue-600 font-medium mb-6">Available on the Clinic plan — UGX 90,000/month</p>
+        <p className="text-sm text-blue-600 font-medium mb-6">Available on the Clinic plan — pay via MTN MoMo</p>
         <div className="flex gap-3">
           <Button
             className="bg-blue-600 hover:bg-blue-700"
             onClick={() => navigate("/settings?upgrade=clinic")}
           >
-            Upgrade to Clinic
+            Upgrade with MTN MoMo
           </Button>
           <Button variant="outline" onClick={() => navigate("/settings")}>
             View plans

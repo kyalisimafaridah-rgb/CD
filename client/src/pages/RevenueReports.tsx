@@ -23,7 +23,7 @@ function ReportsLockedScreen() {
         Revenue reports, daily reconciliation, and collection rate analysis are available on the Clinic plan.
       </p>
       <p className="text-gray-400 text-sm mb-8 max-w-sm">
-        Upgrade to see exactly how much your clinic is collecting, where revenue is coming from, and what's outstanding.
+        Upgrade via MTN MoMo in Settings to see collections, sources, and outstanding balances.
       </p>
       <div className="flex gap-3">
         <Button
@@ -31,7 +31,7 @@ function ReportsLockedScreen() {
           onClick={() => navigate("/settings?upgrade=clinic")}
         >
           <Zap className="h-4 w-4 mr-2" />
-          Upgrade to Clinic — UGX 90,000/mo
+          Upgrade with MTN MoMo — UGX 90,000/mo
         </Button>
         <Button variant="outline" onClick={() => navigate("/settings")}>
           View plans

@@ -42,7 +42,7 @@ export interface TierLimits {
   priceLabel: string;
   /** Price in USD cents per month */
   priceUsdCents: number;
-  /** Price in UGX per month — the currency actually charged (LemonSqueezy checkout, upgrade UI) */
+  /** Price in UGX per month — the currency actually charged (MTN MoMo self-service) */
   priceUgx: number;
 }
 

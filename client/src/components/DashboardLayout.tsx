@@ -1,3 +1,4 @@
+import { OnboardingWizard } from "@/components/OnboardingWizard";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -426,6 +427,7 @@ function DashboardLayoutContent({
       </div>
 
       <SidebarInset>
+        <OnboardingWizard />
         {accessWarning && (
           <Alert className={`mx-4 mt-4 ${
             accessWarning === "subscription_expired" || accessWarning === "grace_period"

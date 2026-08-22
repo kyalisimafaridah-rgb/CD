@@ -1886,3 +1886,10 @@ export async function enforceExpiredPaidPeriod(clinicId: number): Promise<boolea
   });
   return true;
 }
+
+
+export async function markOnboardingComplete(clinicId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.update(clinics).set({ onboardingCompletedAt: new Date() }).where(eq(clinics.id, clinicId));
+}

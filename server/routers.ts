@@ -525,6 +525,22 @@ export const appRouter = router({
       return { success: true };
     }),
 
+    completeOnboarding: protectedProcedure.mutation(async ({ ctx }) => {
+      if (!ctx.user.clinicId) throw new TRPCError({ code: "FORBIDDEN" });
+      if (ctx.user.role !== "manager" && ctx.user.role !== "admin") {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Only managers can complete clinic setup" });
+      }
+      await db.markOnboardingComplete(ctx.user.clinicId);
+      await db.logActivity({
+        clinicId: ctx.user.clinicId,
+        userId: ctx.user.id,
+        action: "COMPLETE_ONBOARDING",
+        entityType: "clinic",
+        entityId: ctx.user.clinicId,
+      });
+      return { success: true } as const;
+    }),
+
     getSmsBalance: protectedProcedure.query(async ({ ctx }) => {
       if (ctx.user.role !== "manager" && ctx.user.role !== "admin") {
         throw new TRPCError({ code: "FORBIDDEN" });

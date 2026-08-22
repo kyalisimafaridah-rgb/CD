@@ -11,6 +11,7 @@ import { mutationErrorToast } from "@/lib/utils";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Download, Zap, CheckCircle, Lock, Loader2, KeyRound, Smartphone } from "lucide-react";
 import { TIER_FEATURES, TIER_LABELS, type SubscriptionTier } from "@shared/tiers";
+import { CAREDESK_MTN_MOMO_DISPLAY, CAREDESK_MTN_MOMO_NUMBER } from "@shared/const";
 import { exportCsv } from "@/lib/csv";
 
 const SMS_STATUS_COLORS: Record<string, string> = {
@@ -85,7 +86,7 @@ function SubscriptionCard() {
     : null;
 
   return (
-    <Card id="subscription">
+    <Card id="subscription-card">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
@@ -191,10 +192,32 @@ function SubscriptionCard() {
             </p>
             <ol className="mt-2 text-xs text-muted-foreground space-y-1 list-decimal list-inside">
               <li>Choose your plan and months below.</li>
-              <li>Send the exact amount via MTN MoMo to the CareDesk number (ask support if needed).</li>
-              <li>For the MoMo <strong>reason / reference</strong>, type your clinic name <strong>exactly</strong> as registered in CareDesk (shown below).</li>
+              <li>
+                Send the exact amount via MTN MoMo to{" "}
+                <strong className="text-green-800">{CAREDESK_MTN_MOMO_DISPLAY}</strong>.
+              </li>
+              <li>
+                For the MoMo <strong>reason / reference</strong>, type your clinic name{" "}
+                <strong>exactly</strong> as registered in CareDesk (shown below).
+              </li>
               <li>Submit this form — we match the payment to your clinic and activate your plan.</li>
             </ol>
+            <div className="mt-3 rounded-md border border-green-300 bg-green-50 px-3 py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <div>
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Pay to (MTN MoMo)</p>
+                <p className="font-bold text-green-900 text-lg tracking-wide">{CAREDESK_MTN_MOMO_DISPLAY}</p>
+              </div>
+              <button
+                type="button"
+                className="text-xs font-medium text-green-800 underline self-start sm:self-center"
+                onClick={() => {
+                  navigator.clipboard.writeText(CAREDESK_MTN_MOMO_NUMBER);
+                  toast.success("MoMo number copied");
+                }}
+              >
+                Copy number
+              </button>
+            </div>
             {clinicInfo?.name && (
               <div className="mt-3 rounded-md border border-green-200 bg-card px-3 py-2">
                 <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Use this as MoMo reason</p>
@@ -364,8 +387,9 @@ function SmsLogCard() {
               <p className="text-sm font-medium text-muted-foreground">SMS logs require the Clinic plan</p>
               <p className="text-xs text-muted-foreground mt-1">Track every SMS sent to patients — appointment reminders, payment receipts, and debt reminders.</p>
             </div>
-            <Button size="sm" className="bg-blue-600 hover:bg-blue-700 mt-1" asChild>
-              <a href="#subscription">Upgrade to Clinic — UGX 90,000/mo</a>
+            <Button size="sm" className="bg-blue-600 hover:bg-blue-700 mt-1"
+              onClick={() => document.getElementById("subscription-card")?.scrollIntoView({ behavior: "smooth" })}>
+              Upgrade with MTN MoMo — UGX 90,000/mo
             </Button>
           </div>
         ) : !smsLog || smsLog.length === 0 ? (
@@ -428,8 +452,9 @@ function ActivityLogCard() {
               <p className="text-sm font-medium text-muted-foreground">Activity audit log requires the Clinic plan</p>
               <p className="text-xs text-muted-foreground mt-1">See every action taken in your clinic — who created records, updated roles, voided bills, and more.</p>
             </div>
-            <Button size="sm" className="bg-blue-600 hover:bg-blue-700 mt-1" asChild>
-              <a href="#subscription">Upgrade to Clinic — UGX 90,000/mo</a>
+            <Button size="sm" className="bg-blue-600 hover:bg-blue-700 mt-1"
+              onClick={() => document.getElementById("subscription-card")?.scrollIntoView({ behavior: "smooth" })}>
+              Upgrade with MTN MoMo — UGX 90,000/mo
             </Button>
           </div>
         ) : !log || log.length === 0 ? (
@@ -498,8 +523,9 @@ function BranchManagementCard() {
               <p className="text-sm font-medium text-muted-foreground">Multiple branches require the Pro plan</p>
               <p className="text-xs text-muted-foreground mt-1">Add separate locations under one owner login and switch between them instantly. Each branch keeps its own patients, staff, and billing — for shared cross-branch patient records, contact us.</p>
             </div>
-            <Button size="sm" className="bg-purple-600 hover:bg-purple-700 mt-1" asChild>
-              <a href="#subscription">Upgrade to Pro — UGX 180,000/mo</a>
+            <Button size="sm" className="bg-purple-600 hover:bg-purple-700 mt-1"
+              onClick={() => document.getElementById("subscription-card")?.scrollIntoView({ behavior: "smooth" })}>
+              Upgrade with MTN MoMo — UGX 180,000/mo
             </Button>
           </div>
         ) : (
@@ -545,7 +571,6 @@ export default function Settings() {
   const canManage = user?.role === "manager" || user?.role === "admin";
 
   const { data: clinic, refetch } = trpc.clinic.get.useQuery();
-  const { data: tierStatusForUpgrade } = trpc.clinic.getTierStatus.useQuery();
   const smsBalanceQuery = trpc.clinic.getSmsBalance.useQuery(undefined, { enabled: canManage });
   const { data: integrationStatus } = trpc.clinic.getIntegrationStatus.useQuery(undefined, { enabled: canManage });
   const updateMutation = trpc.clinic.update.useMutation({
@@ -553,23 +578,19 @@ export default function Settings() {
     onError: (e) => toast.error(e.message),
   });
 
-  // Arrived via a "Get started" click on a specific paid tier from the
-  // landing page (carried through registration) — scroll straight to the
-  // subscription section so the MTN MoMo / activation-code flow is right
-  // there, instead of leaving the person to find it manually below.
+  // Landing page may deep-link to /settings?upgrade=clinic|pro — strip the
+  // param and leave the user on the MTN MoMo subscription card (Lemon Squeezy UI removed).
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const requestedPlan = params.get("upgrade");
-    if (
-      (requestedPlan === "clinic" || requestedPlan === "pro") &&
-      canManage &&
-      tierStatusForUpgrade?.tier === "free"
-    ) {
+    if (params.has("upgrade") || params.has("upgraded")) {
       window.history.replaceState({}, "", "/settings");
-      document.getElementById("subscription")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      if (params.has("upgrade")) {
+        requestAnimationFrame(() => {
+          document.getElementById("subscription-card")?.scrollIntoView({ behavior: "smooth" });
+        });
+      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tierStatusForUpgrade, canManage]);
+  }, []);
 
   const [form, setForm] = useState({
     name: "", phone: "", email: "", address: "", city: "", country: "Uganda",

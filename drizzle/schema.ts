@@ -164,6 +164,8 @@ export const clinics = pgTable("clinics", {
   lsSubscriptionId: varchar("lsSubscriptionId", { length: 100 }),
   subscriptionRenewsAt: timestamp("subscriptionRenewsAt"),
   lastBackupDate: timestamp("lastBackupDate"),
+  /** Set when manager finishes the post-register setup wizard */
+  onboardingCompletedAt: timestamp("onboardingCompletedAt"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().$onUpdate(() => new Date()).notNull(),
 });

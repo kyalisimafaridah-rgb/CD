@@ -99,3 +99,8 @@ To go back you would restore that file, switch `package.json` to `mysql2`, and p
 4. After deploy: `pnpm db:push` to create `subscriptionPaymentRequests`.
 
 Full automation later: MTN MoMo Collections (request-to-pay) + webhook can call the same approve path with no admin click.
+
+
+## Onboarding wizard
+Managers (and admins with a clinic) see a setup wizard until `onboardingCompletedAt` is set.
+Requires `pnpm db:push` after pull so the column exists.
