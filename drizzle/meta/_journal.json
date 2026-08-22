@@ -1,0 +1,41 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1774170569911,
+      "tag": "0000_absent_colleen_wing",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1774170712336,
+      "tag": "0001_flaky_nekra",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1750412800000,
+      "tag": "0002_caredesk_schema_sync",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1750499200000,
+      "tag": "0003_indexes",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1752800000000,
+      "tag": "0006_offline_sync",
+      "breakpoints": true
+    }
+  ]
+}
