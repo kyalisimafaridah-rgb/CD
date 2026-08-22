@@ -25,7 +25,8 @@ import { trpc } from "@/lib/trpc";
 import { SUBSCRIPTION_SUSPENDED_ERR_MSG, TRIAL_EXPIRED_ERR_MSG } from "@shared/const";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { useIsMobile } from "@/hooks/useMobile";
-import { LayoutDashboard, LogOut, PanelLeft, Users, Stethoscope, Receipt, Pill, BarChart3, Calendar, Settings, ShieldAlert, UserCog, Building2, Lock, MoreHorizontal } from "lucide-react";
+import { LayoutDashboard, LogOut, PanelLeft, Users, Stethoscope, Receipt, Pill, BarChart3, Calendar, Settings, ShieldAlert, UserCog, Building2, Lock, MoreHorizontal, Sun, Moon } from "lucide-react";
+import { useTheme } from "@/contexts/ThemeContext";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
@@ -180,6 +181,7 @@ function DashboardLayoutContent({
   setSidebarWidth,
 }: DashboardLayoutContentProps) {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [location, setLocation] = useLocation();
   const { state, toggleSidebar } = useSidebar();
   const isCollapsed = state === "collapsed";
@@ -401,6 +403,14 @@ function DashboardLayoutContent({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
                 <BranchSwitcherItems />
+                <DropdownMenuItem onClick={toggleTheme} className="cursor-pointer">
+                  {theme === "dark" ? (
+                    <Sun className="mr-2 h-4 w-4" />
+                  ) : (
+                    <Moon className="mr-2 h-4 w-4" />
+                  )}
+                  <span>{theme === "dark" ? "Light theme" : "Dark theme"}</span>
+                </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={logout}
                   className="cursor-pointer text-destructive focus:text-destructive"
@@ -497,6 +507,15 @@ function DashboardLayoutContent({
             <span className="font-semibold tracking-tight text-foreground truncate flex-1">
               {activeMenuItem?.label ?? "CareDesk"}
             </span>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 shrink-0"
+              onClick={toggleTheme}
+              aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+            >
+              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </Button>
             {isAdmin && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
