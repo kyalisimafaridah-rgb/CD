@@ -9,7 +9,7 @@
 // serve stale data or replay writes without any of that logic, which is
 // exactly the failure mode this whole setup exists to avoid.
 
-const CACHE_NAME = "caredesk-shell-v2";
+const CACHE_NAME = "caredesk-shell-v20";
 const APP_SHELL = ["/", "/index.html", "/favicon.png", "/logo.png"];
 
 self.addEventListener("install", (event) => {
