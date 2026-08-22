@@ -1374,7 +1374,7 @@ export async function getAllClinicsWithStats() {
     db.select({
       clinicId: bills.clinicId,
       count: sql<number>`count(*)`,
-      revenue: sql<number>`coalesce(sum(case when paymentStatus in ('paid','partial') then amountPaid else 0 end), 0)`,
+      revenue: sql<number>`coalesce(sum(case when ${bills.paymentStatus} in ('paid','partial') then ${bills.amountPaid} else 0 end), 0)`,
       lastBillAt: sql<string | null>`max(${bills.billDate})`,
     }).from(bills).groupBy(bills.clinicId),
     db.select({ clinicId: patients.clinicId, count: sql<number>`count(*)` })
@@ -1441,21 +1441,21 @@ export async function getOwnerRevenueStats() {
   const [[clinicStats], [patientStats], [visitStats], [billStats], [churnStats]] = await Promise.all([
     db.select({
       total: sql<number>`count(*)`,
-      active: sql<number>`sum(case when subscriptionStatus = 'active' then 1 else 0 end)`,
-      suspended: sql<number>`sum(case when subscriptionStatus = 'suspended' then 1 else 0 end)`,
-      newThisWeek: sql<number>`sum(case when createdAt >= ${weekAgo} then 1 else 0 end)`,
-      newThisMonth: sql<number>`sum(case when createdAt >= ${monthAgo} then 1 else 0 end)`,
+      active: sql<number>`sum(case when ${clinics.subscriptionStatus} = 'active' then 1 else 0 end)`,
+      suspended: sql<number>`sum(case when ${clinics.subscriptionStatus} = 'suspended' then 1 else 0 end)`,
+      newThisWeek: sql<number>`sum(case when ${clinics.createdAt} >= ${weekAgo} then 1 else 0 end)`,
+      newThisMonth: sql<number>`sum(case when ${clinics.createdAt} >= ${monthAgo} then 1 else 0 end)`,
     }).from(clinics).where(excludeAdminClinics(clinics.id)),
     db.select({ total: sql<number>`count(*)` }).from(patients).where(excludeAdminClinics(patients.clinicId)),
     db.select({ total: sql<number>`count(*)` }).from(visits).where(excludeAdminClinics(visits.clinicId)),
     db.select({
-      revenue: sql<number>`coalesce(sum(case when paymentStatus in ('paid','partial') then amountPaid else 0 end), 0)`,
+      revenue: sql<number>`coalesce(sum(case when ${bills.paymentStatus} in ('paid','partial') then ${bills.amountPaid} else 0 end), 0)`,
     }).from(bills).where(excludeAdminClinics(bills.clinicId)),
     db.select({
-      cancelledThisMonth: sql<number>`sum(case when eventType = 'cancelled' and createdAt >= ${monthAgo} then 1 else 0 end)`,
-      downgradedThisMonth: sql<number>`sum(case when eventType = 'downgraded' and createdAt >= ${monthAgo} then 1 else 0 end)`,
-      upgradedThisMonth: sql<number>`sum(case when eventType = 'upgraded' and createdAt >= ${monthAgo} then 1 else 0 end)`,
-      needsReviewCount: sql<number>`sum(case when needsReview = true and resolvedAt is null then 1 else 0 end)`,
+      cancelledThisMonth: sql<number>`sum(case when ${subscriptionEvents.eventType} = 'cancelled' and ${subscriptionEvents.createdAt} >= ${monthAgo} then 1 else 0 end)`,
+      downgradedThisMonth: sql<number>`sum(case when ${subscriptionEvents.eventType} = 'downgraded' and ${subscriptionEvents.createdAt} >= ${monthAgo} then 1 else 0 end)`,
+      upgradedThisMonth: sql<number>`sum(case when ${subscriptionEvents.eventType} = 'upgraded' and ${subscriptionEvents.createdAt} >= ${monthAgo} then 1 else 0 end)`,
+      needsReviewCount: sql<number>`sum(case when ${subscriptionEvents.needsReview} = true and ${subscriptionEvents.resolvedAt} is null then 1 else 0 end)`,
     }).from(subscriptionEvents).where(excludeAdminClinics(subscriptionEvents.clinicId)),
   ]);
 
