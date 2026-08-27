@@ -1,0 +1,76 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1774170569911,
+      "tag": "0000_absent_colleen_wing",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1774170712336,
+      "tag": "0001_flaky_nekra",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1750412800000,
+      "tag": "0002_caredesk_schema_sync",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1750499200000,
+      "tag": "0003_indexes",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1751200000000,
+      "tag": "0004_drug_soft_delete",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1751600000000,
+      "tag": "0005_bill_isvoided",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1752800000000,
+      "tag": "0006_offline_sync",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1755852000000,
+      "tag": "0007_subscription_events",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1756100000000,
+      "tag": "0008_foreign_keys",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1756108800000,
+      "tag": "0009_payment_requests_and_momo_sms",
+      "breakpoints": true
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- RECEIVE_SMS: needed to be notified of an incoming SMS at all.
+         READ_SMS: not strictly required since we read the message straight
+         off the broadcast intent (no content-provider query), but some OEM
+         SMS security prompts behave better with it declared — keep it. -->
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+    <uses-permission android:name="android.permission.READ_SMS" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Foreground service keeps Android from killing the relay under
+         Doze/App Standby the way it would a plain BroadcastReceiver-only
+         app. This app's whole job is "don't miss a payment SMS," so it
+         asks to be exempted from battery optimization at first run. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <application
+        android:allowBackup="false"
+        android:icon="@android:drawable/sym_def_app_icon"
+        android:label="CareDesk MoMo Relay"
+        android:theme="@style/Theme.MomoRelay">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="CareDesk MoMo Relay">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- android:priority high so we see the SMS before the default
+             messaging app has a chance to consume it in a way that would
+             stop propagation (it won't, on modern Android, but this is
+             cheap insurance and matches what every SMS-forwarder app does). -->
+        <receiver
+            android:name=".SmsReceiver"
+            android:exported="true"
+            android:permission="android.permission.BROADCAST_SMS">
+            <intent-filter android:priority="999">
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name=".RelayForegroundService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+
+    </application>
+</manifest>
