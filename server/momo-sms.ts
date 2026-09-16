@@ -47,15 +47,22 @@ const MTN_RECEIVED_NO_PHONE_RE =
   /you have received ugx\s*([\d,]+)\s*from\s*.+?\bon\b.+?reason:\s*([^.]+?)\.\s*new balance.*?\bid:\s*(\d+)/is;
 
 /**
- * Airtel Money's own "received" SMS wording differs from MTN's. This is a
- * best-effort placeholder — confirm against a real Airtel-received SMS
- * (as opposed to the MTN SMS reporting an Airtel-originated transfer) and
- * tighten this regex before relying on it. Until then, unmatched Airtel
- * SMS fall through to parse_failed and show up in the review queue rather
- * than silently doing nothing.
+ * Airtel Money's confirmed real Uganda P2P "received" wording — structurally
+ * different from MTN's, not just reworded:
+ * "You have received UGX 50,000 from JANE SMITH (0757654321) on
+ *  15/12/2024 at 2:30 PM. Your new balance is UGX 320,000.
+ *  Transaction ID: AIR123456789."
+ *
+ * Critically, there is NO "Reason:" field at all in this template — Airtel
+ * P2P gives no free-text slot for a payer to type a clinic name into. That
+ * is why matching here CANNOT depend on reasonName the way MTN's path can;
+ * see processInboundMomoSms below, which now matches on the unique
+ * per-request amountUgx first and treats name/phone as corroboration only.
+ * The payer's own phone number IS present here (in parentheses) even
+ * though no reference text is — captured as reasonPhone for that reason.
  */
 const AIRTEL_RECEIVED_RE =
-  /you have received ugx\s*([\d,]+).+?from\s+([a-z\s]+?)[\s.]+(\d{6,15}).*?txid[:\s]*(\w+)/is;
+  /you have received ugx\s*([\d,]+)\s*from\s+(.+?)\s*\((\d{6,15})\)\s*on\b.+?transaction id:\s*(\w+)/is;
 
 export function parseMomoSms(rawBody: string, network: "mtn" | "airtel"): ParsedMomoSms | null {
   const text = rawBody.replace(/\s+/g, " ").trim();
@@ -161,45 +168,48 @@ export async function processInboundMomoSms(rawBody: string, network: "mtn" | "a
     throw err;
   }
 
+  // amountUgx is now unique per request (see requestSubscriptionPayment in
+  // routers.ts — base tier price + an offset derived from the request's own
+  // id), so an exact amount match should almost always identify exactly one
+  // request on its own. This is now the PRIMARY signal, not the Reason-text
+  // match below — that distinction matters specifically for Airtel P2P,
+  // whose confirmed SMS wording has no Reason field at all to match against.
   const candidates = await db.listPendingPaymentRequestsByAmount(parsed.amountUgx);
 
-  // Need clinic names to compare against the Reason text — fetch each
-  // candidate's clinic in parallel rather than N+1'ing sequentially.
-  const withClinics = await Promise.all(
-    candidates.map(async (req) => ({ req, clinic: await db.getClinicById(req.clinicId) }))
-  );
-  const matching = withClinics.filter(
-    ({ clinic }) => clinic && reasonMentionsClinicName(parsed.reasonName, clinic.name)
-  );
-
-  if (matching.length === 0) {
-    await db.updateMomoSmsEventStatus(eventId, {
-      status: candidates.length === 0 ? "no_match" : "ambiguous",
-      note:
-        candidates.length === 0
-          ? undefined
-          : `${candidates.length} pending request(s) at this amount, none matched Reason text "${parsed.reasonName}"`,
-    });
-    return candidates.length === 0
-      ? { status: "no_match" }
-      : { status: "ambiguous", candidateIds: candidates.map((c) => c.id) };
+  if (candidates.length === 0) {
+    await db.updateMomoSmsEventStatus(eventId, { status: "no_match" });
+    return { status: "no_match" };
   }
 
-  if (matching.length > 1) {
-    await db.updateMomoSmsEventStatus(eventId, {
-      status: "ambiguous",
-      note: `Reason "${parsed.reasonName}" matched ${matching.length} clinics at this amount: ${matching
-        .map(({ clinic }) => clinic?.name)
-        .join(", ")}`,
-    });
-    return { status: "ambiguous", candidateIds: matching.map(({ req }) => req.id) };
+  let req = candidates[0];
+  let reviewNote = `Auto-approved via MoMo SMS, exact amount match (txn ${parsed.transactionId})`;
+
+  if (candidates.length > 1) {
+    // Should be rare now that amounts are per-request-unique — most likely
+    // cause is an older pre-uniqueness request still pending, or a manual
+    // amountUgx edit. Name-matching is the tiebreaker here, same as before,
+    // but it's now a fallback for this edge case rather than the main path.
+    const withClinics = await Promise.all(
+      candidates.map(async (r) => ({ r, clinic: await db.getClinicById(r.clinicId) }))
+    );
+    const matching = withClinics.filter(
+      ({ clinic }) => clinic && reasonMentionsClinicName(parsed.reasonName, clinic.name)
+    );
+    if (matching.length !== 1) {
+      await db.updateMomoSmsEventStatus(eventId, {
+        status: "ambiguous",
+        note: `${candidates.length} pending request(s) at this amount; Reason text "${parsed.reasonName}" narrowed to ${matching.length} candidate(s), not exactly 1.`,
+      });
+      return { status: "ambiguous", candidateIds: candidates.map((c) => c.id) };
+    }
+    req = matching[0].r;
+    reviewNote = `Auto-approved via MoMo SMS, disambiguated by Reason text (txn ${parsed.transactionId})`;
   }
 
-  const { req } = matching[0];
   const result = await applyPaymentApproval({
     paymentRequestId: req.id,
     reviewedByUserId: req.requestedByUserId, // no admin actor for an auto-approval
-    reviewNote: `Auto-approved via MoMo SMS match (MTN txn ${parsed.transactionId})`,
+    reviewNote,
     subscriptionEventNote: `Payment request #${req.id} auto-approved via MoMo SMS (txn ${parsed.transactionId})`,
     activityAction: "AUTO_APPROVE_PAYMENT_REQUEST_MOMO_SMS",
     mtnTransactionId: parsed.transactionId,

@@ -119,6 +119,14 @@ class MainActivity : ComponentActivity() {
                         onAction = { requestBatteryExemption() }
                     )
                     Spacer(Modifier.height(8.dp))
+                    var notifAccessGranted by remember { mutableStateOf(isNotificationAccessGranted()) }
+                    StatusRow(
+                        label = "Notification access (backup sensor)",
+                        ok = notifAccessGranted,
+                        actionLabel = "Grant",
+                        onAction = { requestNotificationAccess() }
+                    )
+                    Spacer(Modifier.height(8.dp))
                     StatusRow(label = "Webhook configured", ok = RelaySettings.isConfigured(context), actionLabel = null, onAction = {})
 
                     Spacer(Modifier.height(16.dp))
@@ -126,6 +134,7 @@ class MainActivity : ComponentActivity() {
                         Text("Recent activity", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                         TextButton(onClick = {
                             smsGranted = checkSelfPermission(Manifest.permission.RECEIVE_SMS) == PackageManager.PERMISSION_GRANTED
+                            notifAccessGranted = isNotificationAccessGranted()
                             logEntries = RelayLog.recent(context)
                         }) { Text("Refresh") }
                     }
@@ -192,5 +201,24 @@ class MainActivity : ComponentActivity() {
         } catch (e: Exception) {
             startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
         }
+    }
+
+    // Notification access has no runtime-permission dialog — it's a
+    // toggle buried in system Settings the user has to find and flip
+    // manually. The enabled-listeners string check below is the standard
+    // way to detect whether it's actually on, since there's no direct
+    // "isGranted" API for this permission category.
+    private fun isNotificationAccessGranted(): Boolean {
+        val enabled = Settings.Secure.getString(contentResolver, "enabled_notification_listeners") ?: ""
+        return enabled.contains(packageName)
+    }
+
+    private fun requestNotificationAccess() {
+        Toast.makeText(
+            this,
+            "Find 'CareDesk MoMo Relay' in the list and turn it on",
+            Toast.LENGTH_LONG
+        ).show()
+        startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
     }
 }

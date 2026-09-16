@@ -51,5 +51,19 @@
             android:exported="false"
             android:foregroundServiceType="dataSync" />
 
+        <!-- Second sensor alongside SmsReceiver — see
+             MomoNotificationListenerService.kt for why. Requires the user
+             to grant "Notification access" manually in Settings; there is
+             no runtime-permission dialog for this category. -->
+        <service
+            android:name=".MomoNotificationListenerService"
+            android:exported="true"
+            android:label="CareDesk MoMo Relay"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+
     </application>
 </manifest>

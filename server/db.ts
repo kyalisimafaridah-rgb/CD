@@ -1787,6 +1787,23 @@ export async function getPaymentRequestById(id: number) {
 }
 
 /**
+ * Bumps a just-created request's amountUgx to a value unique to this row
+ * (base tier price + a small offset derived from the row's own id — see
+ * routers.ts requestSubscriptionPayment). Two-step create-then-update
+ * because the offset depends on an id that only exists after insert.
+ */
+export async function updatePaymentRequestAmount(id: number, amountUgx: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db
+    .update(subscriptionPaymentRequests)
+    .set({ amountUgx })
+    .where(eq(subscriptionPaymentRequests.id, id))
+    .returning();
+  return result[0];
+}
+
+/**
  * Atomically claims a pending payment request by flipping status pending ->
  * approved in a single conditional UPDATE. Returns true only if THIS call
  * won the race (i.e. the row was actually pending and got updated).

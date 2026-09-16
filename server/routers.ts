@@ -719,7 +719,7 @@ export const appRouter = router({
         }
 
         const monthly = input.tier === "pro" ? TIER_LIMITS.pro.priceUgx : TIER_LIMITS.clinic.priceUgx;
-        const amountUgx = monthly * input.durationMonths;
+        const baseAmountUgx = monthly * input.durationMonths;
 
         // Block spam: only one pending request per clinic
         const existing = await db.listPaymentRequestsForClinic(ctx.user.clinicId, 5);
@@ -732,21 +732,34 @@ export const appRouter = router({
 
         const clinic = await db.getClinicById(ctx.user.clinicId);
         if (!clinic) throw new TRPCError({ code: "NOT_FOUND", message: "Clinic not found" });
-        // Always store the registered clinic name as MoMo reason so admin matching
-        // is unambiguous and clinics cannot claim another clinic's name.
+        // Still store the clinic name as a corroboration signal for the admin
+        // review queue — but it is NO LONGER what matching depends on (see
+        // below). MTN's Reason field is unreliable and Airtel P2P doesn't
+        // have an equivalent field at all, so a fuzzy text match can't be
+        // the primary mechanism.
         const momoReason = clinic.name.trim();
 
-        const row = await db.createPaymentRequest({
+        // Insert first with the base (shared, collision-prone) amount so we
+        // have a real row id, then bump the amount by a small offset derived
+        // from that id. Two clinics requesting "clinic tier, 1 month" in the
+        // same window now land on DIFFERENT exact amounts (e.g. 90,000 vs
+        // 90,047) — the SMS webhook can match on amount alone, with no
+        // dependence on the payer typing anything into Reason at all. This
+        // is what actually closes the ambiguity gap on both networks,
+        // including Airtel P2P where there's no Reason field to rely on.
+        const created = await db.createPaymentRequest({
           clinicId: ctx.user.clinicId,
           requestedByUserId: ctx.user.id,
           tier: input.tier,
           durationMonths: input.durationMonths,
-          amountUgx,
+          amountUgx: baseAmountUgx,
           payerPhone: momoReason,
           mtnTransactionId: input.mtnTransactionId?.trim() || null,
           note: input.note?.trim() || null,
           status: "pending",
         });
+        const amountUgx = baseAmountUgx + (created.id % 100);
+        const row = await db.updatePaymentRequestAmount(created.id, amountUgx);
 
         await db.logActivity({
           clinicId: ctx.user.clinicId,

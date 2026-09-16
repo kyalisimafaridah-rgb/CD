@@ -21,10 +21,8 @@ const TIER_COLORS: Record<SubscriptionTier, string> = {
 };
 
 function SubscriptionCard() {
-  const utils = trpc.useUtils();
   const { data: tierStatus, isLoading } = trpc.clinic.getTierStatus.useQuery();
   const { data: clinicInfo } = trpc.clinic.get.useQuery();
-  const [activationCode, setActivationCode] = useState("");
   const [payForm, setPayForm] = useState({
     tier: "clinic" as "clinic" | "pro",
     durationMonths: 1,
@@ -41,17 +39,6 @@ function SubscriptionCard() {
   });
   const cancelRequestMutation = trpc.clinic.cancelMyPaymentRequest.useMutation({
     onSuccess: () => { toast.success("Request cancelled"); refetchRequests(); },
-    onError: (e) => toast.error(e.message),
-  });
-  const redeemMutation = trpc.clinic.redeemActivationCode.useMutation({
-    onSuccess: (data) => {
-      toast.success(
-        `Activated ${data.tier} plan until ${new Date(data.appliedUntil).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}`
-      );
-      setActivationCode("");
-      utils.clinic.getTierStatus.invalidate();
-      refetchRequests();
-    },
     onError: (e) => toast.error(e.message),
   });
   const expectedAmount =
@@ -303,31 +290,13 @@ function SubscriptionCard() {
             </div>
           )}
 
-          <details className="text-xs text-gray-500">
-            <summary className="cursor-pointer font-medium text-gray-600">Have an activation code instead?</summary>
-            <div className="mt-2 flex flex-col sm:flex-row gap-2">
-              <Input
-                value={activationCode}
-                onChange={(e) => setActivationCode(e.target.value.toUpperCase())}
-                placeholder="CD-CLN-XXXX-XXXX"
-                className="font-mono tracking-wide h-9"
-              />
-              <Button
-                variant="outline" className="shrink-0"
-                disabled={redeemMutation.isPending || activationCode.trim().length < 8}
-                onClick={() => redeemMutation.mutate({ code: activationCode.trim() })}
-              >
-                {redeemMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Redeem code"}
-              </Button>
-            </div>
-          </details>
         </div>
 
 {tier === "clinic" && (
           <div className="border-t pt-4">
             <p className="text-sm font-medium">Need more branches or unlimited staff?</p>
             <p className="text-xs text-gray-500 mt-1">
-              Pay for Pro (UGX 180,000/month) via MTN MoMo and redeem a Pro activation code above.
+              Pay for Pro (UGX 180,000/month) via MTN MoMo above — we'll activate it once confirmed.
             </p>
           </div>
         )}
@@ -340,7 +309,7 @@ function SubscriptionCard() {
           <div className="border-t pt-4">
             <p className="text-sm font-medium text-gray-700">Manage subscription</p>
             <p className="text-xs text-gray-500 mt-1">
-              Paid via MTN MoMo activation codes. To renew or change plan, pay again and redeem a new code above.
+              Paid via MTN MoMo. To renew or change plan, submit a new payment request above.
               Contact support if you need help.
             </p>
           </div>
